@@ -1,4 +1,4 @@
-import bcrypt from 'bcrypt'
+import bcrypt from 'bcryptjs'
 import getPool from '../_db.js'
 import { signToken, cors } from '../_auth.js'
 

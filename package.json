@@ -9,7 +9,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "bcrypt": "^5.1.1",
+    "bcryptjs": "^2.4.3",
     "jsonwebtoken": "^9.0.2",
     "lucide-react": "^0.383.0",
     "pg": "^8.12.0",
