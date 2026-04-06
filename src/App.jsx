@@ -1,21 +1,26 @@
-import { useState } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import CSS from './styles.js'
 import { DAYS, DEFAULT_DISCIPLINES } from './constants.js'
 import { uid, getWeekDates } from './utils.js'
+import * as api from './api.js'
 
-import Header    from './components/Header.jsx'
-import DayColumn from './components/DayColumn.jsx'
-import AddModal  from './components/AddModal.jsx'
+import Header      from './components/Header.jsx'
+import DayColumn   from './components/DayColumn.jsx'
+import AddModal    from './components/AddModal.jsx'
 import ImportModal from './components/ImportModal.jsx'
-import AIModal   from './components/AIModal.jsx'
-import CatModal  from './components/CatModal.jsx'
+import AIModal     from './components/AIModal.jsx'
+import CatModal    from './components/CatModal.jsx'
+import AuthModal   from './components/AuthModal.jsx'
 
 export default function App() {
+  const [user,  setUser]  = useState(null)
+  const [ready, setReady] = useState(false)
+
   const [off,   setOff]   = useState(0)
   const [wkts,  setWkts]  = useState({})
   const [discs, setDiscs] = useState(DEFAULT_DISCIPLINES)
 
-  const [addM,  setAddM]  = useState(null)   // null | { day?, workout? }
+  const [addM,  setAddM]  = useState(null)
   const [impM,  setImpM]  = useState(false)
   const [aiM,   setAiM]   = useState(false)
   const [catM,  setCatM]  = useState(false)
@@ -24,43 +29,146 @@ export default function App() {
   const wk    = (day) => `${off}|${day}`
   const getDW = (day) => wkts[wk(day)] || []
 
+  // ── AUTH ───────────────────────────────────────────────────────────────────
+  useEffect(() => {
+    const token = localStorage.getItem('ts_token')
+    if (!token) { setReady(true); return }
+    api.auth.me()
+      .then((d) => setUser(d.user))
+      .catch(() => localStorage.removeItem('ts_token'))
+      .finally(() => setReady(true))
+  }, [])
+
+  const handleAuth = async (mode, creds) => {
+    const fn = mode === 'login' ? api.auth.login : api.auth.register
+    const data = await fn(creds)
+    localStorage.setItem('ts_token', data.token)
+    setUser(data.user)
+  }
+
+  const logout = () => {
+    localStorage.removeItem('ts_token')
+    setUser(null)
+    setWkts({})
+    setDiscs(DEFAULT_DISCIPLINES)
+  }
+
+  // ── SYNC: load workouts when week changes ─────────────────────────────────
+  const fetchWeek = useCallback(async (weekOff) => {
+    if (!user) return
+    try {
+      const rows = await api.workouts.list(weekOff)
+      const grouped = {}
+      for (const r of rows) {
+        const k = `${weekOff}|${r.day}`
+        if (!grouped[k]) grouped[k] = []
+        grouped[k].push(r)
+      }
+      setWkts((prev) => {
+        // clear old keys for this week offset, add new
+        const next = { ...prev }
+        DAYS.forEach((d) => { next[`${weekOff}|${d.key}`] = grouped[`${weekOff}|${d.key}`] || [] })
+        return next
+      })
+    } catch { /* offline fallback — keep local state */ }
+  }, [user])
+
+  useEffect(() => { fetchWeek(off) }, [off, fetchWeek])
+
+  // ── SYNC: load disciplines on login ───────────────────────────────────────
+  useEffect(() => {
+    if (!user) return
+    api.disciplines.list()
+      .then((rows) => {
+        if (rows.length) {
+          setDiscs(rows.map((r) => ({
+            id: r.ext_id, name: r.name, icon: r.icon, color: r.color,
+            hasEx: r.has_ex, dp: r.default_params || [],
+          })))
+        }
+      })
+      .catch(() => {})
+  }, [user])
+
   // ── CRUD ──────────────────────────────────────────────────────────────────
-  const upsert = (w) => {
-    const k = wk(w.day)
-    setWkts((prev) => {
-      const list = prev[k] || []
-      if (w.id) return { ...prev, [k]: list.map((x) => (x.id === w.id ? w : x)) }
-      return { ...prev, [k]: [...list, { ...w, id: uid() }] }
-    })
+  const upsert = async (w) => {
+    if (user) {
+      try {
+        if (w.id) {
+          const updated = await api.workouts.update(w.id, w)
+          const k = wk(w.day)
+          setWkts((prev) => ({ ...prev, [k]: (prev[k] || []).map((x) => (x.id === updated.id ? updated : x)) }))
+        } else {
+          const created = await api.workouts.create({ ...w, week_offset: off })
+          const k = wk(w.day)
+          setWkts((prev) => ({ ...prev, [k]: [...(prev[k] || []), created] }))
+        }
+      } catch { /* fallback to local */ }
+    } else {
+      const k = wk(w.day)
+      setWkts((prev) => {
+        const list = prev[k] || []
+        if (w.id) return { ...prev, [k]: list.map((x) => (x.id === w.id ? w : x)) }
+        return { ...prev, [k]: [...list, { ...w, id: uid() }] }
+      })
+    }
     setAddM(null)
   }
 
-  const del = (day, id) => {
+  const del = async (day, id) => {
     const k = wk(day)
     setWkts((prev) => ({ ...prev, [k]: (prev[k] || []).filter((w) => w.id !== id) }))
+    if (user) { try { await api.workouts.remove(id) } catch {} }
   }
 
-  const toggle = (day, id) => {
+  const toggle = async (day, id) => {
     const k = wk(day)
+    let toggled
     setWkts((prev) => ({
       ...prev,
-      [k]: (prev[k] || []).map((w) => (w.id === id ? { ...w, done: !w.done } : w)),
+      [k]: (prev[k] || []).map((w) => {
+        if (w.id === id) { toggled = { ...w, done: !w.done }; return toggled }
+        return w
+      }),
     }))
+    if (user && toggled) { try { await api.workouts.update(id, toggled) } catch {} }
   }
 
   // ── IMPORT ────────────────────────────────────────────────────────────────
-  const importW = (parsed) => {
-    const ns = { ...wkts }
-    // Support both { week: {...} } (current week) and { weeks: { offset: {...} } } (multi-week)
-    const weeks = parsed.weeks || { [off]: parsed.week }
-    for (const [o, days_] of Object.entries(weeks)) {
-      for (const [d, list] of Object.entries(days_)) {
-        ns[`${o}|${d}`] = (list || []).map((w) => ({ ...w, id: uid(), done: false }))
+  const importW = async (parsed) => {
+    if (user) {
+      try {
+        const rows = await api.workouts.import_({ week_offset: off, week: parsed.week })
+        const grouped = {}
+        for (const r of rows) {
+          const k = `${off}|${r.day}`
+          if (!grouped[k]) grouped[k] = []
+          grouped[k].push(r)
+        }
+        setWkts((prev) => {
+          const next = { ...prev }
+          DAYS.forEach((d) => { next[`${off}|${d.key}`] = grouped[`${off}|${d.key}`] || [] })
+          return next
+        })
+      } catch { /* fallback */ }
+    } else {
+      const ns = { ...wkts }
+      const weeks = parsed.weeks || { [off]: parsed.week }
+      for (const [o, days_] of Object.entries(weeks)) {
+        for (const [d, list] of Object.entries(days_)) {
+          ns[`${o}|${d}`] = (list || []).map((w) => ({ ...w, id: uid(), done: false }))
+        }
       }
+      setWkts(ns)
     }
-    setWkts(ns)
     setImpM(false)
     setAiM(false)
+  }
+
+  // ── DISCIPLINES SAVE ─────────────────────────────────────────────────────
+  const saveDiscs = async (newDiscs) => {
+    setDiscs(newDiscs)
+    if (user) { try { await api.disciplines.save(newDiscs) } catch {} }
   }
 
   // ── STATS ─────────────────────────────────────────────────────────────────
@@ -74,13 +182,19 @@ export default function App() {
     { total: 0, done: 0 },
   )
 
+  if (!ready) return <><style>{CSS}</style><div className="tp" style={{ alignItems: 'center', justifyContent: 'center' }}><div className="tp-spinner" /></div></>
+
   return (
     <>
       <style>{CSS}</style>
+
+      {!user && <AuthModal onAuth={handleAuth} />}
+
       <div className="tp">
         <Header
           days={days}
           stats={stats}
+          user={user}
           onPrev={()  => setOff((o) => o - 1)}
           onNext={()  => setOff((o) => o + 1)}
           onToday={()  => setOff(0)}
@@ -88,6 +202,7 @@ export default function App() {
           onImport={() => setImpM(true)}
           onAI={()    => setAiM(true)}
           onCat={()   => setCatM(true)}
+          onLogout={logout}
         />
 
         <main className="tp-board">
@@ -117,7 +232,7 @@ export default function App() {
       )}
       {impM && <ImportModal onImport={importW} onClose={() => setImpM(false)} />}
       {aiM  && <AIModal discs={discs} onImport={importW} onClose={() => setAiM(false)} />}
-      {catM && <CatModal discs={discs} onChange={setDiscs} onClose={() => setCatM(false)} />}
+      {catM && <CatModal discs={discs} onChange={saveDiscs} onClose={() => setCatM(false)} />}
     </>
   )
 }

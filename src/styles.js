@@ -149,6 +149,13 @@ const CSS = `
 .tp-cat-nm{font-size:13px;font-weight:500;color:#9090b8;flex:1;}
 .tp-cdot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
 .tp-color-in{width:30px;height:26px;border-radius:5px;border:none;cursor:pointer;padding:0;background:none;}
+
+/* Auth */
+.tp-auth-tabs{display:flex;gap:4px;margin-bottom:16px;}
+.tp-auth-tab{flex:1;display:flex;align-items:center;justify-content:center;gap:5px;padding:8px;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;border:1px solid #14143a;background:transparent;color:#484868;font-family:'DM Sans',sans-serif;transition:all .15s;}
+.tp-auth-tab:hover{background:#11112a;color:#b8b8d8;}
+.tp-auth-tab.active{background:#b4f13a18;border-color:#b4f13a40;color:#b4f13a;}
+.tp-user-name{font-size:11px;font-weight:600;color:#606080;white-space:nowrap;}
 `
 
 export default CSS
