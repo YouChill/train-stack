@@ -12,7 +12,9 @@ async function request(path, opts = {}) {
       ...opts.headers,
     },
   })
-  const data = await res.json()
+  const text = await res.text()
+  let data
+  try { data = JSON.parse(text) } catch { throw new Error('Serwer zwrócił nieprawidłową odpowiedź') }
   if (!res.ok) throw new Error(data.error || 'Błąd serwera')
   return data
 }
