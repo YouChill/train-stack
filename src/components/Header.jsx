@@ -1,7 +1,7 @@
-import { ChevronLeft, ChevronRight, Plus, Settings, Sparkles, Upload } from 'lucide-react'
+import { ChevronLeft, ChevronRight, LogOut, Plus, Settings, Sparkles, Upload } from 'lucide-react'
 import { fmtDate } from '../utils.js'
 
-export default function Header({ days, stats, onPrev, onNext, onToday, onAdd, onImport, onAI, onCat }) {
+export default function Header({ days, stats, user, onPrev, onNext, onToday, onAdd, onImport, onAI, onCat, onLogout }) {
   const range = `${fmtDate(days[0].date)} – ${fmtDate(days[6].date)}`
   const pct = stats.total > 0 ? Math.round((stats.done / stats.total) * 100) : 0
 
@@ -33,6 +33,14 @@ export default function Header({ days, stats, onPrev, onNext, onToday, onAdd, on
       <button className="tp-hbtn" onClick={onImport}><Upload size={12} /> Import</button>
       <button className="tp-hbtn tp-btn-ai" onClick={onAI}><Sparkles size={12} /> Generuj AI</button>
       <button className="tp-hbtn tp-btn-lime" onClick={onAdd}><Plus size={12} /> Dodaj</button>
+
+      {user && (
+        <>
+          <div className="tp-div" />
+          <span className="tp-user-name">{user.name}</span>
+          <button className="tp-hbtn-ic" onClick={onLogout} title="Wyloguj"><LogOut size={14} /></button>
+        </>
+      )}
     </header>
   )
 }
