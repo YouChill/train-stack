@@ -156,6 +156,19 @@ const CSS = `
 .tp-auth-tab:hover{background:#11112a;color:#b8b8d8;}
 .tp-auth-tab.active{background:#b4f13a18;border-color:#b4f13a40;color:#b4f13a;}
 .tp-user-name{font-size:11px;font-weight:600;color:#606080;white-space:nowrap;}
+
+/* Time & Recurrence */
+.tp-time-rec{display:flex;gap:10px;margin-bottom:4px;}
+.tp-card-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:5px;}
+.tp-card-meta{display:flex;align-items:center;gap:5px;}
+.tp-card-time{display:flex;align-items:center;gap:2px;font-size:9px;font-weight:600;color:#505070;background:#0f0f28;border:1px solid #16163a;border-radius:3px;padding:1px 4px;}
+.tp-card-rec-ic{color:#7c50c8;}
+.tp-rec-days{display:flex;gap:4px;flex-wrap:wrap;}
+.tp-rec-day{background:#07071a;border:1px solid #14143a;border-radius:6px;padding:4px 8px;font-size:10px;font-weight:600;color:#404060;cursor:pointer;transition:all .15s;font-family:'DM Sans',sans-serif;}
+.tp-rec-day:hover{border-color:#1a1a3a;color:#b8b8d8;}
+.tp-rec-day.sel{background:#b4f13a18;border-color:#b4f13a40;color:#b4f13a;}
+.tp-rec-hint{display:flex;align-items:center;gap:5px;font-size:11px;color:#7c50c8;background:#7c50c810;border:1px solid #7c50c825;border-radius:7px;padding:6px 10px;margin-bottom:11px;}
+input[type="time"]{color-scheme:dark;}
 `
 
 export default CSS

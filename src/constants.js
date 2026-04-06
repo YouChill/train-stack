@@ -16,6 +16,15 @@ export const UNITS = [
 
 export const LOAD_UNITS = ['kg', 'lbs', '% 1RM', '%', 'RPE', 'N/A']
 
+export const RECURRENCE_OPTIONS = [
+  { value: 'none',      label: 'Nie powtarza się' },
+  { value: 'weekly',    label: 'Co tydzień' },
+  { value: 'biweekly',  label: 'Co 2 tygodnie' },
+  { value: 'monthly',   label: 'Co miesiąc' },
+  { value: 'weekdays',  label: 'Dni robocze (pon–pt)' },
+  { value: 'custom',    label: 'Niestandardowe...' },
+]
+
 export const DEFAULT_DISCIPLINES = [
   {
     id: 'run', name: 'Bieganie', icon: '🏃', color: '#a3e635', hasEx: false,

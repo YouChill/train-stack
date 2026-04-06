@@ -1,6 +1,6 @@
 import { useState } from 'react'
-import { Check, Minus, Plus, X } from 'lucide-react'
-import { DAYS, UNITS, LOAD_UNITS } from '../constants.js'
+import { Check, Clock, Minus, Plus, Repeat, X } from 'lucide-react'
+import { DAYS, UNITS, LOAD_UNITS, RECURRENCE_OPTIONS } from '../constants.js'
 
 export default function AddModal({ targetDay, workout, discs, onSave, onClose }) {
   const initDisc = workout?.discipline || discs[0]?.id || ''
@@ -10,6 +10,12 @@ export default function AddModal({ targetDay, workout, discs, onSave, onClose })
   const [notes,  setNotes]  = useState(workout?.notes  || '')
   const [rest,   setRest]   = useState(workout?.rest   || false)
   const [day,    setDay]    = useState(workout?.day    || targetDay || 'mon')
+  const [startTime, setStartTime] = useState(workout?.start_time || '')
+
+  const initRec = workout?.recurrence || null
+  const [recType, setRecType] = useState(initRec?.type || 'none')
+  const [recInterval, setRecInterval] = useState(initRec?.interval || 2)
+  const [recDays, setRecDays] = useState(initRec?.days || ['mon','wed','fri'])
 
   const [params, setParams] = useState(() => {
     if (workout?.params?.length) return workout.params.map((p) => ({ ...p }))
@@ -39,6 +45,20 @@ export default function AddModal({ targetDay, workout, discs, onSave, onClose })
   const addE = () => setExs((es) => [...es, { name: '', sets: '', reps: '', load: '', loadUnit: 'kg' }])
   const delE = (i) => setExs((es) => es.filter((_, j) => j !== i))
 
+  const toggleRecDay = (d) => {
+    setRecDays((ds) => ds.includes(d) ? ds.filter((x) => x !== d) : [...ds, d])
+  }
+
+  const buildRecurrence = () => {
+    if (recType === 'none') return null
+    if (recType === 'weekly') return { type: 'weekly', interval: 1 }
+    if (recType === 'biweekly') return { type: 'weekly', interval: 2 }
+    if (recType === 'monthly') return { type: 'monthly', interval: 1 }
+    if (recType === 'weekdays') return { type: 'weekly', interval: 1, days: ['mon','tue','wed','thu','fri'] }
+    if (recType === 'custom') return { type: 'custom', interval: recInterval, days: recDays }
+    return null
+  }
+
   const save = () =>
     onSave({
       ...workout,
@@ -47,6 +67,8 @@ export default function AddModal({ targetDay, workout, discs, onSave, onClose })
       discipline: discId,
       title: title || disc?.name || '',
       notes,
+      start_time: startTime,
+      recurrence: buildRecurrence(),
       params: params.filter((p) => p.key || p.value),
       exercises: exs.filter((e) => e.name),
       rest,
@@ -106,6 +128,67 @@ export default function AddModal({ targetDay, workout, discs, onSave, onClose })
                   onChange={(e) => setTitle(e.target.value)}
                 />
               </div>
+
+              <div className="tp-time-rec">
+                <div className="tp-f" style={{ flex: 1 }}>
+                  <label className="tp-lbl"><Clock size={10} /> Godzina</label>
+                  <input
+                    className="tp-inp"
+                    type="time"
+                    value={startTime}
+                    onChange={(e) => setStartTime(e.target.value)}
+                  />
+                </div>
+                <div className="tp-f" style={{ flex: 1.5 }}>
+                  <label className="tp-lbl"><Repeat size={10} /> Powtarzanie</label>
+                  <select className="tp-sel" value={recType} onChange={(e) => setRecType(e.target.value)}>
+                    {RECURRENCE_OPTIONS.map((o) => (
+                      <option key={o.value} value={o.value}>{o.label}</option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+
+              {recType === 'custom' && (
+                <div className="tp-sec">
+                  <div className="tp-sec-t">Niestandardowe powtarzanie</div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 8 }}>
+                    <span style={{ fontSize: 11, color: '#505070' }}>Co</span>
+                    <input
+                      className="tp-sm"
+                      type="number"
+                      min={1}
+                      max={12}
+                      value={recInterval}
+                      onChange={(e) => setRecInterval(parseInt(e.target.value) || 1)}
+                      style={{ width: 50 }}
+                    />
+                    <span style={{ fontSize: 11, color: '#505070' }}>tyg. w dni:</span>
+                  </div>
+                  <div className="tp-rec-days">
+                    {DAYS.map((d) => (
+                      <button
+                        key={d.key}
+                        className={`tp-rec-day${recDays.includes(d.key) ? ' sel' : ''}`}
+                        onClick={() => toggleRecDay(d.key)}
+                      >
+                        {d.s}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {recType !== 'none' && (
+                <div className="tp-rec-hint">
+                  <Repeat size={10} />
+                  {recType === 'weekly' && 'Powtarza się co tydzień'}
+                  {recType === 'biweekly' && 'Powtarza się co 2 tygodnie'}
+                  {recType === 'monthly' && 'Powtarza się co miesiąc'}
+                  {recType === 'weekdays' && 'Powtarza się w dni robocze'}
+                  {recType === 'custom' && `Co ${recInterval} tyg.: ${recDays.map(d => DAYS.find(x=>x.key===d)?.s).join(', ')}`}
+                </div>
+              )}
 
               <div className="tp-sec">
                 <div className="tp-sec-t">📊 Parametry</div>
