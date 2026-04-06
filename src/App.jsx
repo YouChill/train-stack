@@ -135,7 +135,7 @@ export default function App() {
             }
           }
         }
-      } catch { /* fallback to local */ }
+      } catch (e) { console.error('Workout save error:', e); alert('Błąd zapisu: ' + e.message) }
     } else {
       const k = wk(w.day)
       setWkts((prev) => {
