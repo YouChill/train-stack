@@ -1,4 +1,4 @@
-import { Check, Edit3, Trash2 } from 'lucide-react'
+import { Check, Clock, Edit3, Repeat, Trash2 } from 'lucide-react'
 
 export default function WorkoutCard({ w, discs, onEdit, onDelete, onToggle }) {
   const d = discs.find((x) => x.id === w.discipline) || discs[0]
@@ -9,9 +9,17 @@ export default function WorkoutCard({ w, discs, onEdit, onDelete, onToggle }) {
 
   return (
     <div className={`tp-card${w.done ? ' done' : ''}`} onClick={() => onEdit(w)}>
-      <div className="tp-card-badge" style={{ background: d.color + '22', color: d.color }}>
-        <span>{d.icon}</span>
-        <span>{d.name}</span>
+      <div className="tp-card-top">
+        <div className="tp-card-badge" style={{ background: d.color + '22', color: d.color }}>
+          <span>{d.icon}</span>
+          <span>{d.name}</span>
+        </div>
+        <div className="tp-card-meta">
+          {w.recurrence && <Repeat size={9} className="tp-card-rec-ic" />}
+          {w.start_time && (
+            <span className="tp-card-time"><Clock size={9} /> {w.start_time}</span>
+          )}
+        </div>
       </div>
       <div className="tp-card-title">{w.title || d.name}</div>
 

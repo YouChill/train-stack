@@ -1,9 +1,22 @@
+import { useMemo } from 'react'
 import { Plus } from 'lucide-react'
 import { isToday } from '../utils.js'
 import WorkoutCard from './WorkoutCard.jsx'
 
 export default function DayColumn({ day, workouts, discs, onAdd, onEdit, onDelete, onToggle }) {
   const today = isToday(day.date)
+
+  const sorted = useMemo(() =>
+    [...workouts].sort((a, b) => {
+      const ta = a.start_time || ''
+      const tb = b.start_time || ''
+      if (!ta && !tb) return 0
+      if (!ta) return 1
+      if (!tb) return -1
+      return ta.localeCompare(tb)
+    }),
+    [workouts]
+  )
 
   return (
     <div className="tp-col">
@@ -18,7 +31,7 @@ export default function DayColumn({ day, workouts, discs, onAdd, onEdit, onDelet
       </div>
 
       <div className="tp-col-body">
-        {workouts.map((w) => (
+        {sorted.map((w) => (
           <WorkoutCard
             key={w.id}
             w={w}

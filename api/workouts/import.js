@@ -22,10 +22,11 @@ export default async function handler(req, res) {
     for (const [day, list] of Object.entries(week)) {
       for (const w of list || []) {
         inserts.push(pool.query(
-          `INSERT INTO workouts (user_id, discipline, day, week_offset, title, notes, params, exercises, rest, done)
-           VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10)`,
+          `INSERT INTO workouts (user_id, discipline, day, week_offset, title, notes, params, exercises, rest, done, start_time, recurrence)
+           VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12)`,
           [userId, w.discipline || '', day, off, w.title || '', w.notes || '',
-           JSON.stringify(w.params || []), JSON.stringify(w.exercises || []), w.rest || false, false]
+           JSON.stringify(w.params || []), JSON.stringify(w.exercises || []), w.rest || false, false,
+           w.start_time || '', JSON.stringify(w.recurrence || null)]
         ))
       }
     }

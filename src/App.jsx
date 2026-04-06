@@ -90,6 +90,30 @@ export default function App() {
       .catch(() => {})
   }, [user])
 
+  // ── RECURRENCE HELPER ──────────────────────────────────────────────────────
+  const expandRecurrence = (w, baseOff) => {
+    const rec = w.recurrence
+    if (!rec) return []
+    const copies = []
+    const weeksAhead = 12 // generate 12 weeks ahead
+    const interval = rec.interval || 1
+
+    for (let i = 1; i <= weeksAhead; i++) {
+      if (rec.type === 'weekly' && i % interval !== 0) continue
+      if (rec.type === 'monthly' && i % 4 !== 0) continue
+
+      const targetOff = baseOff + i
+      if (rec.days) {
+        for (const d of rec.days) {
+          copies.push({ ...w, id: undefined, day: d, week_offset: targetOff, recurrence: rec })
+        }
+      } else {
+        copies.push({ ...w, id: undefined, day: w.day, week_offset: targetOff, recurrence: rec })
+      }
+    }
+    return copies
+  }
+
   // ── CRUD ──────────────────────────────────────────────────────────────────
   const upsert = async (w) => {
     if (user) {
@@ -102,6 +126,14 @@ export default function App() {
           const created = await api.workouts.create({ ...w, week_offset: off })
           const k = wk(w.day)
           setWkts((prev) => ({ ...prev, [k]: [...(prev[k] || []), created] }))
+
+          // Create recurring copies in background
+          if (w.recurrence) {
+            const copies = expandRecurrence(w, off)
+            for (const c of copies) {
+              try { await api.workouts.create(c) } catch {}
+            }
+          }
         }
       } catch { /* fallback to local */ }
     } else {
@@ -109,7 +141,17 @@ export default function App() {
       setWkts((prev) => {
         const list = prev[k] || []
         if (w.id) return { ...prev, [k]: list.map((x) => (x.id === w.id ? w : x)) }
-        return { ...prev, [k]: [...list, { ...w, id: uid() }] }
+        const next = { ...prev, [k]: [...list, { ...w, id: uid() }] }
+
+        // Local recurrence
+        if (w.recurrence) {
+          const copies = expandRecurrence(w, off)
+          for (const c of copies) {
+            const ck = `${c.week_offset}|${c.day}`
+            next[ck] = [...(next[ck] || []), { ...c, id: uid() }]
+          }
+        }
+        return next
       })
     }
     setAddM(null)
