@@ -21,6 +21,7 @@ export default async function handler(req, res) {
     res.status(201).json({ user, token: signToken(user.id) })
   } catch (e) {
     if (e.code === '23505') return res.status(409).json({ error: 'Email już istnieje' })
-    res.status(500).json({ error: 'Błąd serwera' })
+    console.error('Register error:', e)
+    res.status(500).json({ error: 'Błąd serwera', detail: e.message })
   }
 }
