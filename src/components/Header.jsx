@@ -30,9 +30,9 @@ export default function Header({ days, stats, user, onPrev, onNext, onToday, onA
       <div className="tp-spacer" />
 
       <button className="tp-hbtn-ic" onClick={onCat} title="Kategorie"><Settings size={14} /></button>
-      <button className="tp-hbtn" onClick={onImport}><Upload size={12} /> Import</button>
-      <button className="tp-hbtn tp-btn-ai" onClick={onAI}><Sparkles size={12} /> Generuj AI</button>
-      <button className="tp-hbtn tp-btn-lime" onClick={onAdd}><Plus size={12} /> Dodaj</button>
+      <button className="tp-hbtn" onClick={onImport}><Upload size={12} /> <span className="tp-hbtn-text">Import</span></button>
+      <button className="tp-hbtn tp-btn-ai" onClick={onAI}><Sparkles size={12} /> <span className="tp-hbtn-text">Generuj AI</span></button>
+      <button className="tp-hbtn tp-btn-lime" onClick={onAdd}><Plus size={12} /> <span className="tp-hbtn-text">Dodaj</span></button>
 
       {user && (
         <>
