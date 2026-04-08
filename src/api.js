@@ -37,3 +37,15 @@ export const disciplines = {
   list: ()     => request('/api/disciplines'),
   save: (list) => request('/api/disciplines', { method: 'PUT', body: JSON.stringify({ disciplines: list }) }),
 }
+
+export const logs = {
+  forWorkout: (wid)    => request(`/api/logs?workout_id=${wid}`),
+  all:        ()       => request('/api/logs?all=1'),
+  create:     (body)   => request('/api/logs',       { method: 'POST', body: JSON.stringify(body) }),
+  update:     (id, b)  => request(`/api/logs/${id}`, { method: 'PUT',  body: JSON.stringify(b) }),
+  remove:     (id)     => request(`/api/logs/${id}`, { method: 'DELETE' }),
+}
+
+export const stats = {
+  get: () => request('/api/stats'),
+}

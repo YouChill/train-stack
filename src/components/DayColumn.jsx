@@ -3,7 +3,7 @@ import { Plus } from 'lucide-react'
 import { isToday } from '../utils.js'
 import WorkoutCard from './WorkoutCard.jsx'
 
-export default function DayColumn({ day, workouts, discs, onAdd, onEdit, onDelete, onToggle }) {
+export default function DayColumn({ day, workouts, discs, onAdd, onEdit, onDelete, onToggle, onTrack }) {
   const today = isToday(day.date)
 
   const sorted = useMemo(() =>
@@ -39,6 +39,7 @@ export default function DayColumn({ day, workouts, discs, onAdd, onEdit, onDelet
             onEdit={onEdit}
             onDelete={onDelete}
             onToggle={onToggle}
+            onTrack={onTrack}
           />
         ))}
       </div>
