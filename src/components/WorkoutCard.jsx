@@ -1,6 +1,6 @@
-import { Check, Clock, Edit3, Repeat, Trash2 } from 'lucide-react'
+import { Check, ClipboardList, Clock, Edit3, Repeat, Trash2 } from 'lucide-react'
 
-export default function WorkoutCard({ w, discs, onEdit, onDelete, onToggle }) {
+export default function WorkoutCard({ w, discs, onEdit, onDelete, onToggle, onTrack }) {
   const d = discs.find((x) => x.id === w.discipline) || discs[0]
   const filled = (w.params || []).filter((p) => p.value)
   const exCnt = (w.exercises || []).length
@@ -44,6 +44,9 @@ export default function WorkoutCard({ w, discs, onEdit, onDelete, onToggle }) {
       )}
 
       <div className="tp-card-ft" onClick={(e) => e.stopPropagation()}>
+        <button className="tp-ca tr" onClick={() => onTrack(w)} title="Zapisz wyniki">
+          <ClipboardList size={12} />
+        </button>
         <button className="tp-ca dn" onClick={() => onToggle(w.id)} title={w.done ? 'Odznacz' : 'Ukończ'}>
           <Check size={12} strokeWidth={w.done ? 3 : 1.5} />
         </button>

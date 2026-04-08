@@ -1,7 +1,7 @@
-import { ChevronLeft, ChevronRight, LogOut, Plus, Settings, Sparkles, Upload } from 'lucide-react'
+import { BarChart3, ChevronLeft, ChevronRight, LogOut, Plus, Settings, Sparkles, Upload } from 'lucide-react'
 import { fmtDate } from '../utils.js'
 
-export default function Header({ days, stats, user, onPrev, onNext, onToday, onAdd, onImport, onAI, onCat, onLogout }) {
+export default function Header({ days, stats, user, onPrev, onNext, onToday, onAdd, onImport, onAI, onCat, onStats, onLogout }) {
   const range = `${fmtDate(days[0].date)} – ${fmtDate(days[6].date)}`
   const pct = stats.total > 0 ? Math.round((stats.done / stats.total) * 100) : 0
 
@@ -29,6 +29,7 @@ export default function Header({ days, stats, user, onPrev, onNext, onToday, onA
 
       <div className="tp-spacer" />
 
+      <button className="tp-hbtn-ic" onClick={onStats} title="Statystyki"><BarChart3 size={14} /></button>
       <button className="tp-hbtn-ic" onClick={onCat} title="Kategorie"><Settings size={14} /></button>
       <button className="tp-hbtn" onClick={onImport}><Upload size={12} /> <span className="tp-hbtn-text">Import</span></button>
       <button className="tp-hbtn tp-btn-ai" onClick={onAI}><Sparkles size={12} /> <span className="tp-hbtn-text">Generuj AI</span></button>

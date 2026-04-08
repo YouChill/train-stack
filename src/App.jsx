@@ -11,6 +11,8 @@ import ImportModal from './components/ImportModal.jsx'
 import AIModal     from './components/AIModal.jsx'
 import CatModal    from './components/CatModal.jsx'
 import AuthModal   from './components/AuthModal.jsx'
+import TrackingModal from './components/TrackingModal.jsx'
+import StatsModal  from './components/StatsModal.jsx'
 
 export default function App() {
   const [user,  setUser]  = useState(null)
@@ -24,6 +26,8 @@ export default function App() {
   const [impM,  setImpM]  = useState(false)
   const [aiM,   setAiM]   = useState(false)
   const [catM,  setCatM]  = useState(false)
+  const [trackM, setTrackM] = useState(null)  // workout to track
+  const [statsM, setStatsM] = useState(false)
 
   const days  = getWeekDates(off)
   const wk    = (day) => `${off}|${day}`
@@ -213,6 +217,24 @@ export default function App() {
     if (user) { try { await api.disciplines.save(newDiscs) } catch {} }
   }
 
+  // ── TRACKING ──────────────────────────────────────────────────────────────
+  const saveLog = async (log) => {
+    if (user) {
+      try {
+        await api.logs.create(log)
+        // Also mark workout as done
+        const w = trackM
+        if (w && !w.done) {
+          const k = wk(w.day)
+          const updated = { ...w, done: true }
+          setWkts((prev) => ({ ...prev, [k]: (prev[k] || []).map((x) => (x.id === w.id ? updated : x)) }))
+          try { await api.workouts.update(w.id, updated) } catch {}
+        }
+      } catch (e) { alert('Błąd zapisu: ' + e.message) }
+    }
+    setTrackM(null)
+  }
+
   // ── STATS ─────────────────────────────────────────────────────────────────
   const stats = DAYS.reduce(
     (a, d) => {
@@ -244,6 +266,7 @@ export default function App() {
           onImport={() => setImpM(true)}
           onAI={()    => setAiM(true)}
           onCat={()   => setCatM(true)}
+          onStats={() => setStatsM(true)}
           onLogout={logout}
         />
 
@@ -258,6 +281,7 @@ export default function App() {
               onEdit={(w)   => setAddM({ day: w.day, workout: w })}
               onDelete={(id) => del(day.key, id)}
               onToggle={(id) => toggle(day.key, id)}
+              onTrack={(w)  => setTrackM(w)}
             />
           ))}
         </main>
@@ -275,6 +299,8 @@ export default function App() {
       {impM && <ImportModal onImport={importW} onClose={() => setImpM(false)} />}
       {aiM  && <AIModal discs={discs} onImport={importW} onClose={() => setAiM(false)} />}
       {catM && <CatModal discs={discs} onChange={saveDiscs} onClose={() => setCatM(false)} />}
+      {trackM && <TrackingModal workout={trackM} discs={discs} user={user} onSave={saveLog} onClose={() => setTrackM(null)} />}
+      {statsM && <StatsModal discs={discs} onClose={() => setStatsM(false)} />}
     </>
   )
 }
