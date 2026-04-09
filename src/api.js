@@ -28,8 +28,8 @@ export const auth = {
 export const workouts = {
   list:    (week)     => request(`/api/workouts?week=${week}`),
   create:  (body)     => request('/api/workouts',        { method: 'POST', body: JSON.stringify(body) }),
-  update:  (id, body) => request(`/api/workouts/${id}`,  { method: 'PUT',  body: JSON.stringify(body) }),
-  remove:  (id)       => request(`/api/workouts/${id}`,  { method: 'DELETE' }),
+  update:  (id, body) => request(`/api/workouts?id=${id}`, { method: 'PUT',  body: JSON.stringify(body) }),
+  remove:  (id)       => request(`/api/workouts?id=${id}`, { method: 'DELETE' }),
   import_: (body)     => request('/api/workouts?action=import', { method: 'POST', body: JSON.stringify(body) }),
 }
 
@@ -42,8 +42,8 @@ export const logs = {
   forWorkout: (wid)    => request(`/api/logs?workout_id=${wid}`),
   all:        ()       => request('/api/logs?all=1'),
   create:     (body)   => request('/api/logs',       { method: 'POST', body: JSON.stringify(body) }),
-  update:     (id, b)  => request(`/api/logs/${id}`, { method: 'PUT',  body: JSON.stringify(b) }),
-  remove:     (id)     => request(`/api/logs/${id}`, { method: 'DELETE' }),
+  update:     (id, b)  => request(`/api/logs?id=${id}`, { method: 'PUT',  body: JSON.stringify(b) }),
+  remove:     (id)     => request(`/api/logs?id=${id}`, { method: 'DELETE' }),
 }
 
 export const stats = {

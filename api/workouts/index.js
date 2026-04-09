@@ -11,6 +11,33 @@ export default async function handler(req, res) {
   const pool = getPool()
 
   try {
+    const { id, action } = req.query
+
+    // PUT /api/workouts?id=X — update workout
+    if (req.method === 'PUT' && id) {
+      const { discipline, day, title, notes, params, exercises, rest, done, start_time, recurrence } = req.body
+      const { rows } = await pool.query(
+        `UPDATE workouts SET discipline=$1, day=$2, title=$3, notes=$4, params=$5, exercises=$6, rest=$7, done=$8, start_time=$9, recurrence=$10
+         WHERE id=$11 AND user_id=$12 RETURNING *`,
+        [discipline, day, title || '', notes || '',
+         JSON.stringify(params || []), JSON.stringify(exercises || []), rest || false, done || false,
+         start_time || '', JSON.stringify(recurrence || null),
+         id, userId]
+      )
+      if (!rows.length) return res.status(404).json({ error: 'Nie znaleziono' })
+      return res.json(rows[0])
+    }
+
+    // DELETE /api/workouts?id=X — delete workout
+    if (req.method === 'DELETE' && id) {
+      const { rowCount } = await pool.query(
+        'DELETE FROM workouts WHERE id = $1 AND user_id = $2', [id, userId]
+      )
+      if (!rowCount) return res.status(404).json({ error: 'Nie znaleziono' })
+      return res.json({ ok: true })
+    }
+
+    // GET /api/workouts?week=X — list workouts
     if (req.method === 'GET') {
       const week = parseInt(req.query.week) || 0
       const { rows } = await pool.query(
@@ -22,7 +49,7 @@ export default async function handler(req, res) {
 
     if (req.method === 'POST') {
       // POST /api/workouts?action=import — bulk import week
-      if (req.query.action === 'import') {
+      if (action === 'import') {
         const { week_offset, week } = req.body
         const off = week_offset ?? 0
         if (!week) return res.status(400).json({ error: 'Brak klucza "week"' })

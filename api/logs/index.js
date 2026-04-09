@@ -11,8 +11,32 @@ export default async function handler(req, res) {
   const pool = getPool()
 
   try {
-    // GET /api/logs?workout_id=X  — get logs for a workout
-    // GET /api/logs?all=1         — get all user logs (for stats)
+    const { id } = req.query
+
+    // PUT /api/logs?id=X — update log
+    if (req.method === 'PUT' && id) {
+      const { note, feeling, actual_params, actual_exercises } = req.body
+      const { rows } = await pool.query(
+        `UPDATE workout_logs SET note=$1, feeling=$2, actual_params=$3, actual_exercises=$4
+         WHERE id=$5 AND user_id=$6 RETURNING *`,
+        [note || '', feeling || 3,
+         JSON.stringify(actual_params || []), JSON.stringify(actual_exercises || []),
+         id, userId]
+      )
+      if (!rows.length) return res.status(404).json({ error: 'Nie znaleziono' })
+      return res.json(rows[0])
+    }
+
+    // DELETE /api/logs?id=X — delete log
+    if (req.method === 'DELETE' && id) {
+      const { rowCount } = await pool.query(
+        'DELETE FROM workout_logs WHERE id = $1 AND user_id = $2', [id, userId]
+      )
+      if (!rowCount) return res.status(404).json({ error: 'Nie znaleziono' })
+      return res.json({ ok: true })
+    }
+
+    // GET /api/logs?workout_id=X or ?all=1
     if (req.method === 'GET') {
       const { workout_id, all } = req.query
       if (all) {
@@ -37,7 +61,7 @@ export default async function handler(req, res) {
       return res.status(400).json({ error: 'Podaj workout_id lub all=1' })
     }
 
-    // POST /api/logs — save a workout log
+    // POST /api/logs — create log
     if (req.method === 'POST') {
       const { workout_id, note, feeling, actual_params, actual_exercises } = req.body
       if (!workout_id) return res.status(400).json({ error: 'Wymagane: workout_id' })
