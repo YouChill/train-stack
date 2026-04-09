@@ -12,6 +12,7 @@ import AIModal     from './components/AIModal.jsx'
 import CatModal    from './components/CatModal.jsx'
 import AuthModal   from './components/AuthModal.jsx'
 import TrackingModal from './components/TrackingModal.jsx'
+import LogJournalModal from './components/LogJournalModal.jsx'
 import StatsModal  from './components/StatsModal.jsx'
 
 export default function App() {
@@ -27,6 +28,8 @@ export default function App() {
   const [aiM,   setAiM]   = useState(false)
   const [catM,  setCatM]  = useState(false)
   const [trackM, setTrackM] = useState(null)  // workout to track
+  const [journalM, setJournalM] = useState(null)  // workout to view journal
+  const [logCounts, setLogCounts] = useState({})  // { workoutId: count }
   const [statsM, setStatsM] = useState(false)
 
   const days  = getWeekDates(off)
@@ -78,6 +81,21 @@ export default function App() {
   }, [user])
 
   useEffect(() => { fetchWeek(off) }, [off, fetchWeek])
+
+  // ── SYNC: load log counts for current week ────────────────────────────────
+  const fetchLogCounts = useCallback(async () => {
+    if (!user) return
+    try {
+      const allLogs = await api.logs.all()
+      const counts = {}
+      for (const l of allLogs) {
+        counts[l.workout_id] = (counts[l.workout_id] || 0) + 1
+      }
+      setLogCounts(counts)
+    } catch {}
+  }, [user])
+
+  useEffect(() => { fetchLogCounts() }, [fetchLogCounts])
 
   // ── SYNC: load disciplines on login ───────────────────────────────────────
   useEffect(() => {
@@ -233,6 +251,7 @@ export default function App() {
       } catch (e) { alert('Błąd zapisu: ' + e.message) }
     }
     setTrackM(null)
+    fetchLogCounts()
   }
 
   // ── STATS ─────────────────────────────────────────────────────────────────
@@ -277,11 +296,13 @@ export default function App() {
               day={day}
               workouts={getDW(day.key)}
               discs={discs}
+              logCounts={logCounts}
               onAdd={()     => setAddM({ day: day.key })}
               onEdit={(w)   => setAddM({ day: w.day, workout: w })}
               onDelete={(id) => del(day.key, id)}
               onToggle={(id) => toggle(day.key, id)}
               onTrack={(w)  => setTrackM(w)}
+              onViewLog={(w) => setJournalM(w)}
             />
           ))}
         </main>
@@ -300,6 +321,7 @@ export default function App() {
       {aiM  && <AIModal discs={discs} onImport={importW} onClose={() => setAiM(false)} />}
       {catM && <CatModal discs={discs} onChange={saveDiscs} onClose={() => setCatM(false)} />}
       {trackM && <TrackingModal workout={trackM} discs={discs} user={user} onSave={saveLog} onClose={() => setTrackM(null)} />}
+      {journalM && <LogJournalModal workout={journalM} discs={discs} onClose={() => setJournalM(null)} onTrack={(w) => { setJournalM(null); setTrackM(w) }} />}
       {statsM && <StatsModal discs={discs} onClose={() => setStatsM(false)} />}
     </>
   )

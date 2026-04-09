@@ -1,9 +1,10 @@
-import { Check, ClipboardList, Clock, Edit3, Repeat, Trash2 } from 'lucide-react'
+import { Check, ClipboardList, Clock, Edit3, History, Repeat, Trash2 } from 'lucide-react'
 
-export default function WorkoutCard({ w, discs, onEdit, onDelete, onToggle, onTrack }) {
+export default function WorkoutCard({ w, discs, logCount, onEdit, onDelete, onToggle, onTrack, onViewLog }) {
   const d = discs.find((x) => x.id === w.discipline) || discs[0]
   const filled = (w.params || []).filter((p) => p.value)
   const exCnt = (w.exercises || []).length
+  const logged = logCount > 0
 
   if (w.rest) return <div className="tp-rest-card">🌙 Odpoczynek</div>
 
@@ -15,6 +16,7 @@ export default function WorkoutCard({ w, discs, onEdit, onDelete, onToggle, onTr
           <span>{d.name}</span>
         </div>
         <div className="tp-card-meta">
+          {logged && <span className="tp-card-logged" title={`${logCount} wpisów`}>✓ {logCount}</span>}
           {w.recurrence && <Repeat size={9} className="tp-card-rec-ic" />}
           {w.start_time && (
             <span className="tp-card-time"><Clock size={9} /> {w.start_time}</span>
@@ -44,10 +46,15 @@ export default function WorkoutCard({ w, discs, onEdit, onDelete, onToggle, onTr
       )}
 
       <div className="tp-card-ft" onClick={(e) => e.stopPropagation()}>
+        {logged && (
+          <button className="tp-ca tr" onClick={() => onViewLog(w)} title="Dziennik treningu">
+            <History size={12} />
+          </button>
+        )}
         <button className="tp-ca tr" onClick={() => onTrack(w)} title="Zapisz wyniki">
           <ClipboardList size={12} />
         </button>
-        <button className="tp-ca dn" onClick={() => onToggle(w.id)} title={w.done ? 'Odznacz' : 'Ukończ'}>
+        <button className="tp-ca dn" onClick={() => w.done ? onToggle(w.id) : onTrack(w)} title={w.done ? 'Odznacz' : 'Potwierdź wykonanie'}>
           <Check size={12} strokeWidth={w.done ? 3 : 1.5} />
         </button>
         <button className="tp-ca ed" onClick={() => onEdit(w)}>

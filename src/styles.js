@@ -219,6 +219,26 @@ input[type="time"]{color-scheme:dark;}
 .tp-log-date{font-size:10px;color:#5b6478;}
 .tp-log-exs{display:flex;flex-wrap:wrap;gap:3px;margin-top:5px;}
 
+/* Card logged indicator */
+.tp-card-logged{display:inline-flex;align-items:center;gap:2px;font-size:9px;font-weight:700;color:#22c55e;background:#22c55e18;border:1px solid #22c55e30;border-radius:3px;padding:1px 5px;letter-spacing:.3px;}
+
+/* Journal modal */
+.tp-journal-list{max-height:450px;overflow-y:auto;}
+.tp-journal-entry{background:#111827;border:1px solid #2a3348;border-radius:10px;padding:12px;margin-bottom:8px;transition:border-color .15s;}
+.tp-journal-entry:hover{border-color:#3b4a63;}
+.tp-journal-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;}
+.tp-journal-date{font-family:'Barlow Condensed',sans-serif;font-size:14px;font-weight:700;color:#d1d5db;}
+.tp-journal-meta{display:flex;align-items:center;gap:6px;font-size:14px;}
+.tp-journal-params{display:flex;flex-wrap:wrap;gap:4px;margin-bottom:6px;}
+.tp-journal-exercises{margin-bottom:6px;}
+.tp-journal-ex-row{display:flex;align-items:center;justify-content:space-between;padding:4px 0;border-bottom:1px solid #1e293b;}
+.tp-journal-ex-row:last-child{border-bottom:none;}
+.tp-journal-ex-name{font-size:13px;font-weight:600;color:#d1d5db;}
+.tp-journal-ex-detail{font-size:13px;color:#9ca3af;font-weight:500;}
+.tp-journal-plan-row{display:flex;align-items:center;justify-content:space-between;padding:3px 0;border-bottom:1px solid #1e293b;}
+.tp-journal-plan-row:last-child{border-bottom:none;}
+.tp-journal-note{font-size:12px;color:#7b849a;font-style:italic;margin-top:4px;padding-top:6px;border-top:1px solid #1e293b;}
+
 /* ── RESPONSIVE ── */
 
 /* Tablet */
