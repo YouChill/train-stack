@@ -20,9 +20,9 @@ async function request(path, opts = {}) {
 }
 
 export const auth = {
-  register: (body) => request('/api/auth/register', { method: 'POST', body: JSON.stringify(body) }),
-  login:    (body) => request('/api/auth/login',    { method: 'POST', body: JSON.stringify(body) }),
-  me:       ()     => request('/api/auth/me'),
+  register: (body) => request('/api/auth?action=register', { method: 'POST', body: JSON.stringify(body) }),
+  login:    (body) => request('/api/auth?action=login',    { method: 'POST', body: JSON.stringify(body) }),
+  me:       ()     => request('/api/auth?action=me'),
 }
 
 export const workouts = {
@@ -30,7 +30,7 @@ export const workouts = {
   create:  (body)     => request('/api/workouts',        { method: 'POST', body: JSON.stringify(body) }),
   update:  (id, body) => request(`/api/workouts/${id}`,  { method: 'PUT',  body: JSON.stringify(body) }),
   remove:  (id)       => request(`/api/workouts/${id}`,  { method: 'DELETE' }),
-  import_: (body)     => request('/api/workouts/import',  { method: 'POST', body: JSON.stringify(body) }),
+  import_: (body)     => request('/api/workouts?action=import', { method: 'POST', body: JSON.stringify(body) }),
 }
 
 export const disciplines = {
