@@ -1,6 +1,13 @@
 import getPool from './_db.js'
+import { verifyToken, cors } from './_auth.js'
 
 export default async function handler(req, res) {
+  cors(res)
+  if (req.method === 'OPTIONS') return res.status(200).end()
+
+  const payload = verifyToken(req)
+  if (!payload) return res.status(401).json({ error: 'Wymagane logowanie' })
+
   try {
     const pool = getPool()
     await pool.query(`
