@@ -56,13 +56,14 @@ const CSS = `
 .tp-chip{background:#1e293b;border:1px solid #334155;border-radius:3px;padding:2px 6px;font-size:11px;color:#8b95a8;font-weight:500;}
 .tp-ex-cnt{font-size:12px;color:#6b7280;font-weight:500;margin-bottom:4px;}
 .tp-card-note{font-size:11px;color:#6b7280;font-style:italic;margin-top:3px;line-height:1.4;}
-.tp-card-ft{display:flex;align-items:center;justify-content:flex-end;gap:2px;opacity:0;transition:opacity .15s;height:18px;margin-top:3px;}
+.tp-card-ft{display:flex;align-items:center;justify-content:flex-end;gap:3px;opacity:0;transition:opacity .15s;margin-top:6px;padding-top:6px;border-top:1px solid #253045;}
 .tp-card:hover .tp-card-ft{opacity:1;}
-.tp-ca{background:none;border:none;padding:2px 3px;cursor:pointer;color:#4b5563;border-radius:4px;transition:all .12s;display:flex;}
-.tp-ca:hover{background:#253045;}
-.tp-ca.dn:hover{color:#b4f13a;}
-.tp-ca.ed:hover{color:#60a5fa;}
-.tp-ca.dl:hover{color:#f87171;}
+.tp-ca{background:#111827;border:1px solid #2a3348;padding:5px 6px;cursor:pointer;color:#6b7280;border-radius:6px;transition:all .15s;display:flex;align-items:center;justify-content:center;}
+.tp-ca:hover{background:#253045;border-color:#3b4a63;}
+.tp-ca.dn{color:#6b7280;}.tp-ca.dn:hover{color:#b4f13a;border-color:#b4f13a40;background:#b4f13a10;}
+.tp-ca.ed:hover{color:#60a5fa;border-color:#60a5fa40;background:#60a5fa10;}
+.tp-ca.dl:hover{color:#f87171;border-color:#f8717140;background:#f8717110;}
+.tp-ca.tr:hover{color:#7c50c8;border-color:#7c50c840;background:#7c50c810;}
 .tp-rest-card{border:1px dashed #2a3348;border-radius:9px;padding:10px;text-align:center;color:#4b5563;font-size:12px;font-weight:500;}
 
 /* ── OVERLAY / MODAL ── */
@@ -191,8 +192,6 @@ input[type="time"]{color-scheme:dark;}
 .tp-track-col{display:flex;flex-direction:column;gap:2px;}
 .tp-track-col-lbl{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:#4b5563;}
 .tp-track-col-plan{font-size:11px;color:#5b6478;}
-.tp-ca.tr:hover{color:#7c50c8;}
-
 /* Stats */
 .tp-stats-cards{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:14px;}
 .tp-stat-card{background:#111827;border:1px solid #2a3348;border-radius:10px;padding:14px 10px;text-align:center;}
@@ -269,8 +268,8 @@ input[type="time"]{color-scheme:dark;}
 
 .tp-card{padding:8px 9px 6px;}
 .tp-card-title{font-size:14px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
-.tp-card-ft{opacity:1;margin-top:5px;gap:4px;}
-.tp-ca{padding:4px 6px;}
+.tp-card-ft{opacity:1;margin-top:6px;gap:4px;}
+.tp-ca{padding:5px 7px;}
 
 .tp-ov{padding:10px;}
 .tp-mi{padding:16px;}

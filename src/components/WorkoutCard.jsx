@@ -48,20 +48,20 @@ export default function WorkoutCard({ w, discs, logCount, onEdit, onDelete, onTo
       <div className="tp-card-ft" onClick={(e) => e.stopPropagation()}>
         {logged && (
           <button className="tp-ca tr" onClick={() => onViewLog(w)} title="Dziennik treningu">
-            <History size={12} />
+            <History size={14} />
           </button>
         )}
         <button className="tp-ca tr" onClick={() => onTrack(w)} title="Zapisz wyniki">
-          <ClipboardList size={12} />
+          <ClipboardList size={14} />
         </button>
         <button className="tp-ca dn" onClick={() => w.done ? onToggle(w.id) : onTrack(w)} title={w.done ? 'Odznacz' : 'Potwierdź wykonanie'}>
-          <Check size={12} strokeWidth={w.done ? 3 : 1.5} />
+          <Check size={14} strokeWidth={w.done ? 3 : 1.5} />
         </button>
         <button className="tp-ca ed" onClick={() => onEdit(w)}>
-          <Edit3 size={12} />
+          <Edit3 size={14} />
         </button>
         <button className="tp-ca dl" onClick={() => onDelete(w.id)}>
-          <Trash2 size={12} />
+          <Trash2 size={14} />
         </button>
       </div>
     </div>
