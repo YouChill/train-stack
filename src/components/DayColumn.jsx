@@ -1,10 +1,17 @@
-import { useMemo } from 'react'
+import { useMemo, useRef, useEffect } from 'react'
 import { Plus } from 'lucide-react'
 import { isToday } from '../utils.js'
 import WorkoutCard from './WorkoutCard.jsx'
 
 export default function DayColumn({ day, workouts, discs, logCounts, onAdd, onEdit, onDelete, onToggle, onTrack, onViewLog }) {
   const today = isToday(day.date)
+  const colRef = useRef(null)
+
+  useEffect(() => {
+    if (today && colRef.current) {
+      colRef.current.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'nearest' })
+    }
+  }, [today])
 
   const sorted = useMemo(() =>
     [...workouts].sort((a, b) => {
@@ -19,7 +26,7 @@ export default function DayColumn({ day, workouts, discs, logCounts, onAdd, onEd
   )
 
   return (
-    <div className="tp-col">
+    <div className="tp-col" ref={colRef}>
       <div className={`tp-col-hd${today ? ' today' : ''}`}>
         <div className="tp-col-hd-top">
           <span className={`tp-day-s${today ? ' today' : ''}`}>{day.s}</span>
