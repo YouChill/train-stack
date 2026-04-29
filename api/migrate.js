@@ -28,6 +28,7 @@ export default async function handler(req, res) {
       CREATE INDEX IF NOT EXISTS idx_logs_user ON workout_logs(user_id);
       CREATE INDEX IF NOT EXISTS idx_logs_workout ON workout_logs(workout_id);
     `)
+    await pool.query(`ALTER TABLE workout_logs ENABLE ROW LEVEL SECURITY;`)
     res.json({ status: 'ok', message: 'All migrations complete' })
   } catch (e) {
     res.json({ status: 'error', error: e.message })
