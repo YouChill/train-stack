@@ -14,6 +14,7 @@ import AuthModal   from './components/AuthModal.jsx'
 import TrackingModal from './components/TrackingModal.jsx'
 import LogJournalModal from './components/LogJournalModal.jsx'
 import StatsModal  from './components/StatsModal.jsx'
+import ExerciseModal from './components/ExerciseModal.jsx'
 
 export default function App() {
   const [user,  setUser]  = useState(null)
@@ -31,6 +32,7 @@ export default function App() {
   const [journalM, setJournalM] = useState(null)  // workout to view journal
   const [logCounts, setLogCounts] = useState({})  // { workoutId: count }
   const [statsM, setStatsM] = useState(false)
+  const [exerciseM, setExerciseM] = useState(null) // { workout, exercise }
 
   const days  = getWeekDates(off)
   const wk    = (day) => `${off}|${day}`
@@ -303,6 +305,7 @@ export default function App() {
               onToggle={(id) => toggle(day.key, id)}
               onTrack={(w)  => setTrackM(w)}
               onViewLog={(w) => setJournalM(w)}
+              onExercise={(w, ex) => setExerciseM({ workout: w, exercise: ex })}
             />
           ))}
         </main>
@@ -322,6 +325,7 @@ export default function App() {
       {catM && <CatModal discs={discs} onChange={saveDiscs} onClose={() => setCatM(false)} />}
       {trackM && <TrackingModal workout={trackM} discs={discs} user={user} onSave={saveLog} onClose={() => setTrackM(null)} />}
       {journalM && <LogJournalModal workout={journalM} discs={discs} onClose={() => setJournalM(null)} onTrack={(w) => { setJournalM(null); setTrackM(w) }} />}
+      {exerciseM && <ExerciseModal workout={exerciseM.workout} exercise={exerciseM.exercise} discs={discs} onClose={() => setExerciseM(null)} />}
       {statsM && <StatsModal discs={discs} onClose={() => setStatsM(false)} />}
     </>
   )

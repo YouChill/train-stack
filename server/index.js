@@ -5,6 +5,7 @@ import 'dotenv/config'
 import authRoutes from './routes/auth.js'
 import workoutRoutes from './routes/workouts.js'
 import disciplineRoutes from './routes/disciplines.js'
+import exerciseLogRoutes from './routes/exercise-logs.js'
 
 const app = express()
 const PORT = process.env.PORT || 3001
@@ -15,6 +16,7 @@ app.use(express.json())
 app.use('/api/auth', authRoutes)
 app.use('/api/workouts', workoutRoutes)
 app.use('/api/disciplines', disciplineRoutes)
+app.use('/api/exercise-logs', exerciseLogRoutes)
 
 app.get('/api/health', (_req, res) => res.json({ status: 'ok' }))
 
