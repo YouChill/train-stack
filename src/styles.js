@@ -306,6 +306,10 @@ input[type="time"]{color-scheme:dark;}
 .tp-chip{font-size:9px;padding:1px 4px;}
 
 .tp-time-rec{flex-direction:column;gap:0;}
+
+.tp-eh{display:none;}
+.tp-er{grid-template-columns:1fr 1fr 1fr 1fr 24px;gap:4px;row-gap:3px;margin-bottom:8px;}
+.tp-er>*:first-child{grid-column:1 / -1;}
 }
 `
 
