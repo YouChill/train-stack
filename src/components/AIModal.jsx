@@ -36,12 +36,12 @@ Odpowiedz TYLKO poprawnym JSON:
     "tue": [],
     "wed": [{"discipline":"gym","title":"Siłownia górna","params":[],"exercises":[{"name":"Bench Press","sets":"4","reps":"8","load":"80","loadUnit":"kg"}],"notes":"","rest":false}],
     "thu": [],
-    "fri": [],
+    "fri": [{"discipline":"stretch","title":"Rozciąganie","params":[{"key":"Czas trwania","value":"20","unit":"min"}],"exercises":[{"name":"Skłon do przodu","sets":"2","reps":"1","load":"30","loadUnit":"sek"},{"name":"Pozycja gołębia","sets":"2","reps":"1","load":"45","loadUnit":"sek"}],"notes":"","rest":false}],
     "sat": [],
     "sun": [{"discipline":"run","title":"Odpoczynek","params":[],"exercises":[],"notes":"","rest":true}]
   }
 }
-Zasady: dni bez treningu = []. Dla biegania/pływania używaj params. Dla siłowni/boksu używaj exercises. Dostosuj do prośby. TYLKO JSON.`,
+Zasady: dni bez treningu = []. Dla biegania/pływania używaj params. Dla siłowni/boksu używaj exercises (sets/reps/load/loadUnit). Dla rozciągania (stretch) używaj exercises gdzie load = czas utrzymania pozycji a loadUnit = "sek". Dostosuj do prośby. TYLKO JSON.`,
           }],
         }),
       })
