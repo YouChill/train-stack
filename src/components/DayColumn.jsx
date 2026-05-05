@@ -3,7 +3,7 @@ import { Plus } from 'lucide-react'
 import { isToday } from '../utils.js'
 import WorkoutCard from './WorkoutCard.jsx'
 
-export default function DayColumn({ day, workouts, discs, logCounts, onAdd, onEdit, onDelete, onToggle, onTrack, onViewLog, onExercise }) {
+export default function DayColumn({ day, workouts, discs, logCounts, onAdd, onView, onEdit, onDelete, onToggle, onTrack, onViewLog }) {
   const today = isToday(day.date)
   const colRef = useRef(null)
 
@@ -44,12 +44,12 @@ export default function DayColumn({ day, workouts, discs, logCounts, onAdd, onEd
             w={w}
             discs={discs}
             logCount={logCounts[w.id] || 0}
+            onView={onView}
             onEdit={onEdit}
             onDelete={onDelete}
             onToggle={onToggle}
             onTrack={onTrack}
             onViewLog={onViewLog}
-            onExercise={onExercise}
           />
         ))}
       </div>

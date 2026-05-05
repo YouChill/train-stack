@@ -66,13 +66,16 @@ const CSS = `
 .tp-ca.tr:hover{color:#7c50c8;border-color:#7c50c840;background:#7c50c810;}
 .tp-rest-card{border:1px dashed #2a3348;border-radius:9px;padding:10px;text-align:center;color:#4b5563;font-size:12px;font-weight:500;}
 
-/* ── EXERCISE CARD LIST (clickable rows in WorkoutCard) ── */
-.tp-ex-card-list{display:flex;flex-direction:column;gap:2px;margin-bottom:5px;}
-.tp-ex-card-item{background:none;border:1px solid transparent;border-radius:6px;padding:4px 6px;cursor:pointer;text-align:left;width:100%;display:flex;align-items:baseline;justify-content:space-between;gap:6px;transition:all .12s;font-family:'DM Sans',sans-serif;}
-.tp-ex-card-item:hover{background:#1e293b;border-color:#2a3a50;}
-.tp-ex-card-item:hover .tp-ex-card-name{color:#b4f13a;}
-.tp-ex-card-name{font-size:12px;font-weight:600;color:#c0cce0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;flex:1;}
-.tp-ex-card-detail{font-size:10px;color:#4b5563;white-space:nowrap;flex-shrink:0;}
+/* ── WORKOUT PLAN MODAL — exercise rows ── */
+.tp-plan-ex-list{display:flex;flex-direction:column;gap:3px;}
+.tp-plan-ex-row{background:#111827;border:1px solid #2a3348;border-radius:8px;padding:10px 12px;cursor:pointer;text-align:left;width:100%;display:flex;align-items:center;justify-content:space-between;gap:8px;transition:all .15s;font-family:'DM Sans',sans-serif;}
+.tp-plan-ex-row:hover{background:#1e293b;border-color:#3b4a63;}
+.tp-plan-ex-row:hover .tp-plan-ex-name{color:#b4f13a;}
+.tp-plan-ex-row:hover .tp-plan-ex-arrow{color:#b4f13a;}
+.tp-plan-ex-left{display:flex;flex-direction:column;gap:2px;min-width:0;}
+.tp-plan-ex-name{font-size:14px;font-weight:600;color:#e5e7eb;}
+.tp-plan-ex-detail{font-size:11px;color:#5b6478;}
+.tp-plan-ex-arrow{color:#374151;flex-shrink:0;transition:color .15s;}
 
 /* ── OVERLAY / MODAL ── */
 .tp-ov{position:fixed;inset:0;background:rgba(8,12,20,.87);z-index:200;display:flex;align-items:center;justify-content:center;padding:20px;backdrop-filter:blur(5px);}
