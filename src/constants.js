@@ -14,7 +14,7 @@ export const UNITS = [
   'kcal', 'W', 'bpm', 'x',
 ]
 
-export const LOAD_UNITS = ['kg', 'lbs', '% 1RM', '%', 'RPE', 'N/A']
+export const LOAD_UNITS = ['kg', 'lbs', '% 1RM', '%', 'RPE', 'sek', 'min', 'N/A']
 
 export const RECURRENCE_OPTIONS = [
   { value: 'none',      label: 'Nie powtarza się' },
@@ -55,6 +55,13 @@ export const DEFAULT_DISCIPLINES = [
       { key: 'Intensywność', value: '', unit: 'RPE' },
     ],
   },
+  {
+    id: 'stretch', name: 'Rozciąganie', icon: '🧘', color: '#c084fc', hasEx: true,
+    dp: [
+      { key: 'Czas trwania', value: '', unit: 'min' },
+      { key: 'Intensywność', value: '', unit: 'RPE' },
+    ],
+  },
 ]
 
 export const EXAMPLE_JSON = `{
@@ -77,6 +84,19 @@ export const EXAMPLE_JSON = `{
         {"name":"Bench Press","sets":"4","reps":"8","load":"80","loadUnit":"kg"}
       ],
       "notes": ""
+    }],
+    "fri": [{
+      "discipline": "stretch",
+      "title": "Rozciąganie wieczorne",
+      "params": [
+        {"key":"Czas trwania","value":"20","unit":"min"}
+      ],
+      "exercises": [
+        {"name":"Skłon do przodu","sets":"2","reps":"1","load":"30","loadUnit":"sek"},
+        {"name":"Pozycja gołębia","sets":"2","reps":"1","load":"45","loadUnit":"sek"},
+        {"name":"Rozciąganie klatki w drzwiach","sets":"3","reps":"1","load":"30","loadUnit":"sek"}
+      ],
+      "notes": "Każde ćwiczenie na obie strony"
     }],
     "sun": [{
       "rest": true,
