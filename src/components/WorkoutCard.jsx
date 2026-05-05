@@ -1,9 +1,9 @@
 import { Check, ClipboardList, Clock, Edit3, History, Repeat, Trash2 } from 'lucide-react'
 
-export default function WorkoutCard({ w, discs, logCount, onEdit, onDelete, onToggle, onTrack, onViewLog }) {
+export default function WorkoutCard({ w, discs, logCount, onEdit, onDelete, onToggle, onTrack, onViewLog, onExercise }) {
   const d = discs.find((x) => x.id === w.discipline) || discs[0]
   const filled = (w.params || []).filter((p) => p.value)
-  const exCnt = (w.exercises || []).length
+  const exercises = w.exercises || []
   const logged = logCount > 0
 
   if (w.rest) return <div className="tp-rest-card">🌙 Odpoczynek</div>
@@ -33,9 +33,22 @@ export default function WorkoutCard({ w, discs, logCount, onEdit, onDelete, onTo
         </div>
       )}
 
-      {exCnt > 0 && (
-        <div className="tp-ex-cnt">
-          💪 {exCnt} ćwiczeni{exCnt === 1 ? 'e' : exCnt < 5 ? 'a' : ''}
+      {exercises.length > 0 && (
+        <div className="tp-ex-card-list" onClick={(e) => e.stopPropagation()}>
+          {exercises.map((ex, i) => (
+            <button
+              key={i}
+              className="tp-ex-card-item"
+              onClick={() => onExercise && onExercise(w, ex)}
+              title="Otwórz szczegóły ćwiczenia"
+            >
+              <span className="tp-ex-card-name">{ex.name}</span>
+              <span className="tp-ex-card-detail">
+                {ex.sets}×{ex.reps}
+                {ex.load ? ` · ${ex.load}${ex.loadUnit || 'kg'}` : ''}
+              </span>
+            </button>
+          ))}
         </div>
       )}
 

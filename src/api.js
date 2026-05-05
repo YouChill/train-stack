@@ -46,6 +46,13 @@ export const logs = {
   remove:     (id)     => request(`/api/logs?id=${id}`, { method: 'DELETE' }),
 }
 
+export const exerciseLogs = {
+  forExercise: (name)     => request(`/api/exercise-logs?exercise_name=${encodeURIComponent(name)}`),
+  save:        (body)     => request('/api/exercise-logs',          { method: 'POST', body: JSON.stringify(body) }),
+  update:      (id, body) => request(`/api/exercise-logs?id=${id}`, { method: 'PUT',  body: JSON.stringify(body) }),
+  remove:      (id)       => request(`/api/exercise-logs?id=${id}`, { method: 'DELETE' }),
+}
+
 export const stats = {
   get: () => request('/api/stats'),
 }
