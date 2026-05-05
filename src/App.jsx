@@ -334,7 +334,7 @@ export default function App() {
           onClose={() => setPlanM(null)}
           onEdit={(w) => { setPlanM(null); setAddM({ day: w.day, workout: w }) }}
           onTrack={(w) => { setPlanM(null); setTrackM(w) }}
-          onExercise={(w, ex) => { setPlanM(null); setExerciseM({ workout: w, exercise: ex }) }}
+          onExercise={(w, ex) => setExerciseM({ workout: w, exercise: ex })}
         />
       )}
       {exerciseM && <ExerciseModal workout={exerciseM.workout} exercise={exerciseM.exercise} discs={discs} onClose={() => setExerciseM(null)} />}
