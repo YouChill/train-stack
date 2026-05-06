@@ -84,7 +84,6 @@ export default function ExerciseModal({ workout, exercise, discs, onClose }) {
   const [logDate,  setLogDate]  = useState(today())
   const [rows,     setRows]     = useState(buildRows())
   const [history,  setHistory]  = useState([])
-  const [loading,  setLoading]  = useState(true)
   const [saving,   setSaving]   = useState(false)
   const [saved,    setSaved]    = useState(false)
   const [histPage, setHistPage] = useState(0)
@@ -97,7 +96,6 @@ export default function ExerciseModal({ workout, exercise, discs, onClose }) {
         if (todayLog?.sets?.length) setRows(todayLog.sets)
       })
       .catch(() => {})
-      .finally(() => setLoading(false))
   }, [exercise.name])
 
   useEffect(() => {
@@ -197,7 +195,7 @@ export default function ExerciseModal({ workout, exercise, discs, onClose }) {
 
           {history.length >= 2 && <VolumeChart history={history} />}
 
-          {!loading && history.length > 0 && (
+          {history.length > 0 && (
             <div className="tp-ex-hist">
               <div className="tp-ex-hist-hdr">
                 <span className="tp-lbl" style={{ margin: 0 }}>Historia</span>
@@ -235,8 +233,6 @@ export default function ExerciseModal({ workout, exercise, discs, onClose }) {
               })}
             </div>
           )}
-
-          {loading && <div className="tp-loading"><div className="tp-spinner" /><p>Ładuję historię…</p></div>}
         </div>
 
         <div className="tp-ex-footer">
