@@ -325,7 +325,7 @@ export default function App() {
       {impM && <ImportModal onImport={importW} onClose={() => setImpM(false)} />}
       {aiM  && <AIModal discs={discs} onImport={importW} onClose={() => setAiM(false)} />}
       {catM && <CatModal discs={discs} onChange={saveDiscs} onClose={() => setCatM(false)} />}
-      {trackM && <TrackingModal workout={trackM} discs={discs} user={user} onSave={saveLog} onClose={() => setTrackM(null)} />}
+      {trackM && <TrackingModal workout={trackM} discs={discs} onSave={saveLog} onClose={() => setTrackM(null)} />}
       {journalM && <LogJournalModal workout={journalM} discs={discs} onClose={() => setJournalM(null)} onTrack={(w) => { setJournalM(null); setTrackM(w) }} />}
       {planM && (
         <WorkoutPlanModal
