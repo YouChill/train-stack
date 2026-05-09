@@ -324,17 +324,17 @@ input[type="time"]{color-scheme:dark;}
 }
 
 /* ── EXERCISE MODAL ── */
-.tp-ex-ov{align-items:flex-start;padding:0;}
-.tp-ex-modal{background:#111827;border:1px solid #2a3a50;width:100%;max-width:560px;height:100vh;max-height:100vh;display:flex;flex-direction:column;border-radius:0;margin:0 auto;}
+.tp-ex-ov{align-items:flex-start;padding:0;height:100vh;height:100dvh;}
+.tp-ex-modal{background:#111827;border:1px solid #2a3a50;width:100%;max-width:560px;height:100vh;height:100dvh;max-height:100vh;max-height:100dvh;display:flex;flex-direction:column;border-radius:0;margin:0 auto;}
 @media(min-width:600px){
-  .tp-ex-ov{align-items:center;padding:16px;}
-  .tp-ex-modal{height:auto;max-height:92vh;border-radius:16px;}
+  .tp-ex-ov{align-items:center;padding:16px;height:auto;}
+  .tp-ex-modal{height:auto;max-height:92vh;max-height:92dvh;border-radius:16px;}
 }
 .tp-ex-hdr{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;padding:20px 20px 0;flex-shrink:0;}
 .tp-ex-hdr-left{display:flex;flex-direction:column;gap:5px;min-width:0;}
 .tp-ex-name{font-family:'Barlow Condensed',sans-serif;font-size:26px;font-weight:800;color:#e5e7eb;line-height:1.1;margin:0;}
 .tp-ex-subtitle{font-size:11px;color:#5b6478;font-weight:500;}
-.tp-ex-body{flex:1;overflow-y:auto;padding:16px 20px;}
+.tp-ex-body{flex:1;overflow-y:auto;padding:16px 20px;min-height:0;-webkit-overflow-scrolling:touch;}
 .tp-ex-date-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;gap:10px;}
 .tp-ex-date-inp{width:auto;max-width:160px;}
 .tp-ex-sets-section{background:#1a2233;border:1px solid #2a3348;border-radius:12px;padding:12px;margin-bottom:12px;}
@@ -371,7 +371,7 @@ input[type="time"]{color-scheme:dark;}
 .tp-ex-hist-chip{font-size:10px;color:#6b7280;}
 .tp-ex-hist-vol{font-size:10px;color:#4b5563;font-style:italic;}
 .tp-ex-completed{font-size:12px;color:#6b7280;font-weight:600;}
-.tp-ex-footer{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:14px 20px;border-top:1px solid #1e293b;flex-shrink:0;background:#111827;}
+.tp-ex-footer{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:14px 20px;padding-bottom:calc(14px + env(safe-area-inset-bottom));border-top:1px solid #1e293b;flex-shrink:0;background:#111827;}
 .tp-ex-footer-actions{display:flex;gap:8px;}
 .tp-btn-saved{background:#1a3a0a !important;border-color:#b4f13a40 !important;color:#b4f13a !important;}
 `
