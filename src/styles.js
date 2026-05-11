@@ -53,8 +53,8 @@ const CSS = `
 ::-webkit-scrollbar-thumb{background:#2a3348;border-radius:2px;}
 
 /* ── CARD ── */
-.tp-card{background:#cbd3e0;border:1px solid #aab4c5;border-radius:9px;padding:10px 11px 8px;cursor:pointer;transition:border-color .15s,box-shadow .15s;position:relative;box-shadow:0 1px 2px rgba(20,30,55,.04);}
-.tp-card:hover{border-color:#c9d1e0;box-shadow:0 4px 12px rgba(20,30,55,.08);}
+.tp-card{background:#fff;border:1px solid #d4dbe8;border-radius:9px;padding:10px 11px 8px;cursor:pointer;transition:border-color .15s,box-shadow .15s;position:relative;box-shadow:0 1px 3px rgba(20,30,55,.06);}
+.tp-card:hover{border-color:#b8c4d8;box-shadow:0 4px 12px rgba(20,30,55,.10);}
 .tp-card.done{opacity:.38;}
 .tp-card-badge{display:inline-flex;align-items:center;gap:3px;padding:2px 7px 2px 4px;border-radius:4px;font-size:10px;font-weight:700;letter-spacing:.7px;text-transform:uppercase;margin-bottom:5px;}
 .tp-card-title{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:16px;color:#1f2937;line-height:1.2;margin-bottom:5px;}
@@ -321,8 +321,8 @@ input[type="time"]{color-scheme:dark;}
 .tp-dv-nowline-lbl{position:absolute;left:-58px;top:-9px;width:46px;text-align:center;font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:800;color:#111827;background:#a8d92a;padding:1px 6px;border-radius:4px;letter-spacing:.4px;box-shadow:0 1px 4px rgba(168,217,42,.3);font-variant-numeric:tabular-nums;}
 
 /* Day card */
-.tp-dv-card{background:#cbd3e0;border:1px solid #aab4c5;border-radius:10px;padding:12px 14px;cursor:pointer;transition:all .15s;border-left:3px solid var(--dc,#b4f13a);box-shadow:0 1px 3px rgba(20,30,55,.06);}
-.tp-dv-card:hover{border-color:#c9d1e0;border-left-color:var(--dc,#b4f13a);box-shadow:0 6px 18px rgba(20,30,55,.10);}
+.tp-dv-card{background:#fff;border:1px solid #d4dbe8;border-radius:10px;padding:12px 14px;cursor:pointer;transition:all .15s;border-left:3px solid var(--dc,#b4f13a);box-shadow:0 1px 3px rgba(20,30,55,.06);}
+.tp-dv-card:hover{border-color:#b8c4d8;border-left-color:var(--dc,#b4f13a);box-shadow:0 6px 18px rgba(20,30,55,.10);}
 .tp-dv-card.done{opacity:.5;}
 .tp-dv-card-top{display:flex;align-items:center;gap:8px;margin-bottom:6px;}
 .tp-dv-card-time{font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:700;color:#5b6478;display:flex;align-items:center;gap:4px;}
