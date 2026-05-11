@@ -1,6 +1,6 @@
 import { Clock, ClipboardList, Check, Edit3, Trash2 } from 'lucide-react'
 
-export default function DayCard({ w, discs, logCounts, onEdit, onDelete, onToggle, onTrack }) {
+export default function DayCard({ w, discs, logCounts, onView, onEdit, onDelete, onToggle, onTrack }) {
   if (w.rest) return null
 
   const disc = discs.find((x) => x.id === w.discipline) || discs[0]
@@ -12,7 +12,7 @@ export default function DayCard({ w, discs, logCounts, onEdit, onDelete, onToggl
     <div
       className={`tp-dv-card${w.done ? ' done' : ''}`}
       style={{ '--dc': disc.color }}
-      onClick={onEdit}
+      onClick={() => onView(w)}
     >
       <div className="tp-dv-card-top">
         {w.start_time && (
@@ -64,7 +64,7 @@ export default function DayCard({ w, discs, logCounts, onEdit, onDelete, onToggl
         <button className="tp-ca dn" title={w.done ? 'Odznacz' : 'Potwierdź'} onClick={onToggle}>
           <Check size={14} strokeWidth={w.done ? 3 : 1.5} />
         </button>
-        <button className="tp-ca ed" onClick={onEdit}>
+        <button className="tp-ca ed" onClick={() => onEdit(w)}>
           <Edit3 size={14} />
         </button>
         <button className="tp-ca dl" onClick={onDelete}>
