@@ -6,6 +6,7 @@ import * as api from './api.js'
 
 import Header      from './components/Header.jsx'
 import DayColumn   from './components/DayColumn.jsx'
+import DayView     from './components/DayView.jsx'
 import AddModal    from './components/AddModal.jsx'
 import ImportModal from './components/ImportModal.jsx'
 import AIModal     from './components/AIModal.jsx'
@@ -17,13 +18,27 @@ import StatsModal  from './components/StatsModal.jsx'
 import ExerciseModal from './components/ExerciseModal.jsx'
 import WorkoutPlanModal from './components/WorkoutPlanModal.jsx'
 
+function getTodayKey() {
+  return ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'][new Date().getDay()]
+}
+
 export default function App() {
   const [user,  setUser]  = useState(null)
   const [ready, setReady] = useState(false)
 
-  const [off,   setOff]   = useState(0)
+  const [off,     setOff]     = useState(0)
+  const [view,    setView]    = useState('day')
+  const [selDay,  setSelDay]  = useState(getTodayKey)
   const [wkts,  setWkts]  = useState({})
   const [discs, setDiscs] = useState(DEFAULT_DISCIPLINES)
+
+  const shiftSelDay = (delta) => {
+    const keys = DAYS.map((d) => d.key)
+    setSelDay((cur) => {
+      const i = keys.indexOf(cur)
+      return keys[(i + delta + keys.length) % keys.length]
+    })
+  }
 
   const [addM,  setAddM]  = useState(null)
   const [impM,  setImpM]  = useState(false)
@@ -282,41 +297,62 @@ export default function App() {
           days={days}
           stats={stats}
           user={user}
-          onPrev={()  => setOff((o) => o - 1)}
-          onNext={()  => setOff((o) => o + 1)}
-          onToday={()  => setOff(0)}
-          onAdd={()   => setAddM({})}
+          view={view}
+          selDay={selDay}
+          onPrev={() => view === 'day' ? shiftSelDay(-1) : setOff((o) => o - 1)}
+          onNext={() => view === 'day' ? shiftSelDay(1)  : setOff((o) => o + 1)}
+          onToday={() => { setOff(0); setSelDay(getTodayKey()) }}
+          onAdd={() => setAddM({ day: view === 'day' ? selDay : undefined })}
           onImport={() => setImpM(true)}
           onAI={()    => setAiM(true)}
           onCat={()   => setCatM(true)}
           onStats={() => setStatsM(true)}
           onLogout={logout}
+          onSetView={setView}
         />
 
-        <main className="tp-board">
-          {days.map((day) => (
-            <DayColumn
-              key={day.key}
-              day={day}
-              workouts={getDW(day.key)}
-              discs={discs}
-              logCounts={logCounts}
-              onAdd={()    => setAddM({ day: day.key })}
-              onView={(w)  => setPlanM(w)}
-              onEdit={(w)  => setAddM({ day: w.day, workout: w })}
-              onDelete={(id) => del(day.key, id)}
-              onToggle={(id) => toggle(day.key, id)}
-              onTrack={(w)  => setTrackM(w)}
-              onViewLog={(w) => setJournalM(w)}
-            />
-          ))}
-        </main>
+        {view === 'day' ? (
+          <DayView
+            days={days}
+            wkts={wkts}
+            off={off}
+            selDay={selDay}
+            setSelDay={setSelDay}
+            discs={discs}
+            logCounts={logCounts}
+            onAdd={(day, time) => setAddM({ day, prefillTime: time })}
+            onEdit={(w) => setAddM({ day: w.day, workout: w })}
+            onDelete={del}
+            onToggle={toggle}
+            onTrack={(w) => setTrackM(w)}
+          />
+        ) : (
+          <main className="tp-board">
+            {days.map((day) => (
+              <DayColumn
+                key={day.key}
+                day={day}
+                workouts={getDW(day.key)}
+                discs={discs}
+                logCounts={logCounts}
+                onAdd={()    => setAddM({ day: day.key })}
+                onView={(w)  => setPlanM(w)}
+                onEdit={(w)  => setAddM({ day: w.day, workout: w })}
+                onDelete={(id) => del(day.key, id)}
+                onToggle={(id) => toggle(day.key, id)}
+                onTrack={(w)  => setTrackM(w)}
+                onViewLog={(w) => setJournalM(w)}
+              />
+            ))}
+          </main>
+        )}
       </div>
 
       {addM !== null && (
         <AddModal
           targetDay={addM.day || 'mon'}
           workout={addM.workout}
+          prefillTime={addM.prefillTime}
           discs={discs}
           onSave={upsert}
           onClose={() => setAddM(null)}

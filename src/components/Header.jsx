@@ -1,9 +1,25 @@
-import { BarChart3, ChevronLeft, ChevronRight, LogOut, Plus, Settings, Sparkles, Upload } from 'lucide-react'
-import { fmtDate } from '../utils.js'
+import { BarChart3, ChevronLeft, ChevronRight, Grid, Layers, LogOut, Plus, Settings, Sparkles, Upload } from 'lucide-react'
 
-export default function Header({ days, stats, user, onPrev, onNext, onToday, onAdd, onImport, onAI, onCat, onStats, onLogout }) {
-  const range = `${fmtDate(days[0].date)} – ${fmtDate(days[6].date)}`
+const MONTHS_GEN = ['stycznia','lutego','marca','kwietnia','maja','czerwca','lipca','sierpnia','września','października','listopada','grudnia']
+
+function fmtWeekRange(days) {
+  const fmt = (d) => `${d.getDate()}.${String(d.getMonth() + 1).padStart(2, '0')}`
+  return `${fmt(days[0].date)} – ${fmt(days[6].date)}`
+}
+
+function fmtDayLabel(day) {
+  if (!day) return ''
+  return `${day.full}, ${day.date.getDate()} ${MONTHS_GEN[day.date.getMonth()]}`
+}
+
+export default function Header({
+  days, stats, user, view, selDay,
+  onPrev, onNext, onToday, onAdd, onImport, onAI, onCat, onStats, onLogout,
+  onSetView,
+}) {
   const pct = stats.total > 0 ? Math.round((stats.done / stats.total) * 100) : 0
+  const selectedDay = days.find((d) => d.key === selDay)
+  const wrange = view === 'week' ? fmtWeekRange(days) : fmtDayLabel(selectedDay)
 
   return (
     <header className="tp-hdr">
@@ -12,11 +28,20 @@ export default function Header({ days, stats, user, onPrev, onNext, onToday, onA
 
       <div className="tp-wnav">
         <button className="tp-hbtn-ic" onClick={onPrev}><ChevronLeft size={14} /></button>
-        <div className="tp-wrange">{range}</div>
+        <div className="tp-wrange" style={{ minWidth: view === 'day' ? 180 : 134 }}>{wrange}</div>
         <button className="tp-hbtn-ic" onClick={onNext}><ChevronRight size={14} /></button>
       </div>
 
       <button className="tp-hbtn" onClick={onToday} style={{ fontSize: 11 }}>Dziś</button>
+
+      <div className="tp-view-sw">
+        <button className={view === 'week' ? 'active' : ''} onClick={() => onSetView('week')}>
+          <Grid size={11} /> Tydzień
+        </button>
+        <button className={view === 'day' ? 'active' : ''} onClick={() => onSetView('day')}>
+          <Layers size={11} /> Dzień
+        </button>
+      </div>
 
       {stats.total > 0 && (
         <div className="tp-prog">

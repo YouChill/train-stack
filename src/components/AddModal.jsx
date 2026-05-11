@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { Check, Clock, Minus, Plus, Repeat, X } from 'lucide-react'
 import { DAYS, UNITS, LOAD_UNITS, RECURRENCE_OPTIONS } from '../constants.js'
 
-export default function AddModal({ targetDay, workout, discs, onSave, onClose }) {
+export default function AddModal({ targetDay, workout, prefillTime, discs, onSave, onClose }) {
   const initDisc = workout?.discipline || discs[0]?.id || ''
 
   const [discId, setDiscId] = useState(initDisc)
@@ -10,7 +10,7 @@ export default function AddModal({ targetDay, workout, discs, onSave, onClose })
   const [notes,  setNotes]  = useState(workout?.notes  || '')
   const [rest,   setRest]   = useState(workout?.rest   || false)
   const [day,    setDay]    = useState(workout?.day    || targetDay || 'mon')
-  const [startTime, setStartTime] = useState(workout?.start_time || '')
+  const [startTime, setStartTime] = useState(workout?.start_time || prefillTime || '')
 
   const initRec = workout?.recurrence || null
   const [recType, setRecType] = useState(initRec?.type || 'none')
