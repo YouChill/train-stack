@@ -321,6 +321,7 @@ export default function App() {
             discs={discs}
             logCounts={logCounts}
             onAdd={(day, time) => setAddM({ day, prefillTime: time })}
+            onView={(w) => setPlanM(w)}
             onEdit={(w) => setAddM({ day: w.day, workout: w })}
             onDelete={del}
             onToggle={toggle}
