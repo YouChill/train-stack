@@ -44,7 +44,7 @@ const CSS = `
 .tp-day-s.today{color:#65a30d;}
 .tp-add-day{background:none;border:none;cursor:pointer;color:#b4bccc;padding:2px;border-radius:4px;transition:all .15s;display:flex;}
 .tp-add-day:hover{color:#65a30d;background:#b4f13a25;}
-.tp-day-n{font-family:'Barlow Condensed',sans-serif;font-size:28px;font-weight:800;line-height:1;color:#cbd2de;}
+.tp-day-n{font-family:'Barlow Condensed',sans-serif;font-size:28px;font-weight:800;line-height:1;color:#a8b4c8;}
 .tp-day-n.today{color:#65a30d;}
 .tp-col-body{flex:1;overflow-y:auto;padding:7px;display:flex;flex-direction:column;gap:5px;}
 
