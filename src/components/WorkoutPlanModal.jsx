@@ -7,7 +7,7 @@ export default function WorkoutPlanModal({ workout, discs, onClose, onEdit, onTr
 
   return (
     <div className="tp-ov" onClick={(e) => e.target === e.currentTarget && onClose()}>
-      <div className="tp-modal tp-modal-w">
+      <div className="tp-modal tp-modal-w tp-plan-modal" style={{ '--dc': disc.color }}>
         <div className="tp-mi">
 
           {/* Header */}
@@ -64,7 +64,7 @@ export default function WorkoutPlanModal({ workout, discs, onClose, onEdit, onTr
           {workout.notes && (
             <div className="tp-sec">
               <div className="tp-sec-t">📝 Notatki</div>
-              <div style={{ fontSize: 13, color: '#9ca3af', lineHeight: 1.5 }}>{workout.notes}</div>
+              <div style={{ fontSize: 13, color: '#5b6478', lineHeight: 1.5 }}>{workout.notes}</div>
             </div>
           )}
 
