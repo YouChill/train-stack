@@ -83,6 +83,24 @@ const CSS = `
 .tp-plan-ex-detail{font-size:11px;color:#5b6478;}
 .tp-plan-ex-arrow{color:#374151;flex-shrink:0;transition:color .15s;}
 
+/* ── WORKOUT PLAN MODAL — light theme (matches day/week cards) ── */
+.tp-plan-modal{background:#fff;border:1px solid #d4dbe8;border-left:3px solid var(--dc,#b4f13a);box-shadow:0 12px 40px rgba(20,30,55,.22);}
+.tp-plan-modal .tp-mt{color:#1f2937;}
+.tp-plan-modal .tp-x{background:#f4f6fb;border:1px solid #e1e6f0;color:#7b849a;}
+.tp-plan-modal .tp-x:hover{background:#eaeef5;color:#1f2937;}
+.tp-plan-modal .tp-sec{background:#f4f6fb;border:1px solid #e1e6f0;}
+.tp-plan-modal .tp-sec-t{color:#7b849a;}
+.tp-plan-modal .tp-plan-ex-row{background:#fff;border:1px solid #e1e6f0;}
+.tp-plan-modal .tp-plan-ex-row:hover{background:#f4f6fb;border-color:#c9d1e0;}
+.tp-plan-modal .tp-plan-ex-row:hover .tp-plan-ex-name{color:#65a30d;}
+.tp-plan-modal .tp-plan-ex-row:hover .tp-plan-ex-arrow{color:#65a30d;}
+.tp-plan-modal .tp-plan-ex-name{color:#1f2937;}
+.tp-plan-modal .tp-plan-ex-detail{color:#7b849a;}
+.tp-plan-modal .tp-plan-ex-arrow{color:#b4bccc;}
+.tp-plan-modal .tp-mf{border-top:1px solid #eaeef5;}
+.tp-plan-modal .tp-bg{color:#7b849a;border:1px solid #d4dbe8;}
+.tp-plan-modal .tp-bg:hover{background:#f4f6fb;color:#1f2937;}
+
 /* ── OVERLAY / MODAL ── */
 .tp-ov{position:fixed;inset:0;background:rgba(8,12,20,.87);z-index:200;display:flex;align-items:center;justify-content:center;padding:20px;backdrop-filter:blur(5px);}
 .tp-modal{background:#1a2233;border:1px solid #2a3a50;border-radius:16px;width:100%;max-width:520px;max-height:92vh;overflow-y:auto;position:relative;}
