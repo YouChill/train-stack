@@ -1,26 +1,36 @@
-// Lightweight Resend client (REST). No extra deps – uses global fetch.
-// Required env: RESEND_API_KEY, RESEND_FROM (e.g. "TRAINstack <noreply@example.com>")
-// Optional env: APP_URL (used to build reset links)
+// Gmail SMTP via nodemailer.
+// Required env:
+//   GMAIL_USER          – Twój adres Gmail (np. you@gmail.com)
+//   GMAIL_APP_PASSWORD  – 16-znakowe App Password z https://myaccount.google.com/apppasswords
+// Optional env:
+//   MAIL_FROM_NAME      – wyświetlana nazwa nadawcy (default: "TRAINstack")
+//   APP_URL             – baza dla linków resetujących
+import nodemailer from 'nodemailer'
+
+let transporter
+
+function getTransporter() {
+  const user = process.env.GMAIL_USER
+  const pass = process.env.GMAIL_APP_PASSWORD
+  if (!user || !pass) {
+    throw new Error('Mail nie jest skonfigurowany (GMAIL_USER / GMAIL_APP_PASSWORD)')
+  }
+  if (!transporter) {
+    transporter = nodemailer.createTransport({
+      host: 'smtp.gmail.com',
+      port: 465,
+      secure: true,
+      auth: { user, pass },
+    })
+  }
+  return transporter
+}
 
 export async function sendMail({ to, subject, html }) {
-  const key = process.env.RESEND_API_KEY
-  const from = process.env.RESEND_FROM
-  if (!key || !from) {
-    throw new Error('Mail nie jest skonfigurowany (RESEND_API_KEY / RESEND_FROM)')
-  }
-  const res = await fetch('https://api.resend.com/emails', {
-    method: 'POST',
-    headers: {
-      Authorization: `Bearer ${key}`,
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({ from, to, subject, html }),
-  })
-  if (!res.ok) {
-    const text = await res.text().catch(() => '')
-    throw new Error(`Resend error ${res.status}: ${text}`)
-  }
-  return res.json().catch(() => ({}))
+  const t = getTransporter()
+  const fromName = process.env.MAIL_FROM_NAME || 'TRAINstack'
+  const from = `${fromName} <${process.env.GMAIL_USER}>`
+  return t.sendMail({ from, to, subject, html })
 }
 
 export function resetEmailHtml({ name, link }) {
