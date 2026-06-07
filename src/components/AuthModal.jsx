@@ -103,7 +103,7 @@ export default function AuthModal({ onAuth }) {
             )}
 
             {err && <div className="tp-err" style={{ marginBottom: 10 }}>{err}</div>}
-            {info && <div className="tp-info" style={{ marginBottom: 10, color: '#86efac', fontSize: 13 }}>{info}</div>}
+            {info && <div className="tp-info" style={{ marginBottom: 10, color: '#16a34a', fontSize: 13 }}>{info}</div>}
 
             <button className="tp-btn tp-bl" type="submit" disabled={loading} style={{ width: '100%', justifyContent: 'center' }}>
               {mode === 'login' ? <LogIn size={13} /> : mode === 'register' ? <UserPlus size={13} /> : <Mail size={13} />}

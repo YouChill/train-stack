@@ -95,7 +95,7 @@ export default function AddModal({ targetDay, workout, prefillTime, discs, onSav
 
           <div className={`tp-rt${rest ? ' on' : ''}`} onClick={() => setRest((r) => !r)}>
             <div className={`tp-tg${rest ? ' on' : ''}`} />
-            <span style={{ fontSize: 13, color: rest ? '#9090c0' : '#303050' }}>
+            <span style={{ fontSize: 13, color: rest ? '#7c50c8' : '#303050' }}>
               {rest ? '🌙 Dzień odpoczynku' : 'Oznacz jako dzień odpoczynku'}
             </span>
           </div>
