@@ -12,6 +12,7 @@ import ImportModal from './components/ImportModal.jsx'
 import AIModal     from './components/AIModal.jsx'
 import CatModal    from './components/CatModal.jsx'
 import AuthModal   from './components/AuthModal.jsx'
+import ResetPasswordModal from './components/ResetPasswordModal.jsx'
 import TrackingModal from './components/TrackingModal.jsx'
 import LogJournalModal from './components/LogJournalModal.jsx'
 import StatsModal  from './components/StatsModal.jsx'
@@ -25,6 +26,20 @@ function getTodayKey() {
 export default function App() {
   const [user,  setUser]  = useState(null)
   const [ready, setReady] = useState(false)
+  const [resetToken, setResetToken] = useState(() => {
+    if (typeof window === 'undefined') return null
+    const params = new URLSearchParams(window.location.search)
+    return params.get('reset')
+  })
+
+  const clearResetParam = () => {
+    setResetToken(null)
+    if (typeof window !== 'undefined' && window.history?.replaceState) {
+      const url = new URL(window.location.href)
+      url.searchParams.delete('reset')
+      window.history.replaceState({}, '', url.pathname + (url.search ? url.search : '') + url.hash)
+    }
+  }
 
   const [off,     setOff]     = useState(0)
   const [view,    setView]    = useState('day')
@@ -290,7 +305,19 @@ export default function App() {
     <>
       <style>{CSS}</style>
 
-      {!user && <AuthModal onAuth={handleAuth} />}
+      {resetToken && (
+        <ResetPasswordModal
+          token={resetToken}
+          onDone={(data) => {
+            localStorage.setItem('ts_token', data.token)
+            setUser(data.user)
+            clearResetParam()
+          }}
+          onCancel={clearResetParam}
+        />
+      )}
+
+      {!user && !resetToken && <AuthModal onAuth={handleAuth} />}
 
       <div className="tp">
         <Header
