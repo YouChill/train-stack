@@ -20,9 +20,11 @@ async function request(path, opts = {}) {
 }
 
 export const auth = {
-  register: (body) => request('/api/auth?action=register', { method: 'POST', body: JSON.stringify(body) }),
-  login:    (body) => request('/api/auth?action=login',    { method: 'POST', body: JSON.stringify(body) }),
-  me:       ()     => request('/api/auth?action=me'),
+  register:      (body) => request('/api/auth?action=register',       { method: 'POST', body: JSON.stringify(body) }),
+  login:         (body) => request('/api/auth?action=login',          { method: 'POST', body: JSON.stringify(body) }),
+  me:            ()     => request('/api/auth?action=me'),
+  requestReset:  (body) => request('/api/auth?action=request-reset',  { method: 'POST', body: JSON.stringify(body) }),
+  resetPassword: (body) => request('/api/auth?action=reset-password', { method: 'POST', body: JSON.stringify(body) }),
 }
 
 export const workouts = {
