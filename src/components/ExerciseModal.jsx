@@ -44,8 +44,8 @@ function VolumeChart({ history }) {
           const y = PAD.t + iH * (1 - f)
           return (
             <g key={f}>
-              <line x1={PAD.l} y1={y} x2={W - PAD.r} y2={y} stroke="#2a3348" strokeWidth="1" strokeDasharray="3,3" />
-              <text x={PAD.l - 4} y={y + 3} textAnchor="end" fontSize="8" fill="#4b5563">{Math.round(maxV * f)}</text>
+              <line x1={PAD.l} y1={y} x2={W - PAD.r} y2={y} stroke="#d4dbe8" strokeWidth="1" strokeDasharray="3,3" />
+              <text x={PAD.l - 4} y={y + 3} textAnchor="end" fontSize="8" fill="#94a0b4">{Math.round(maxV * f)}</text>
             </g>
           )
         })}
