@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import CSS from './styles.js'
 import { DAYS, DEFAULT_DISCIPLINES } from './constants.js'
-import { uid, getWeekDates } from './utils.js'
+import { uid, getWeekDates, weekStartStr } from './utils.js'
 import * as api from './api.js'
 
 import Header      from './components/Header.jsx'
@@ -98,7 +98,7 @@ export default function App() {
   const fetchWeek = useCallback(async (weekOff) => {
     if (!user) return
     try {
-      const rows = await api.workouts.list(weekOff)
+      const rows = await api.workouts.list(weekStartStr(weekOff))
       const grouped = {}
       for (const r of rows) {
         const k = `${weekOff}|${r.day}`
@@ -161,10 +161,10 @@ export default function App() {
       const targetOff = baseOff + i
       if (rec.days) {
         for (const d of rec.days) {
-          copies.push({ ...w, id: undefined, day: d, week_offset: targetOff, recurrence: rec })
+          copies.push({ ...w, id: undefined, day: d, week_offset: targetOff, week_start: weekStartStr(targetOff), recurrence: rec })
         }
       } else {
-        copies.push({ ...w, id: undefined, day: w.day, week_offset: targetOff, recurrence: rec })
+        copies.push({ ...w, id: undefined, day: w.day, week_offset: targetOff, week_start: weekStartStr(targetOff), recurrence: rec })
       }
     }
     return copies
@@ -179,7 +179,7 @@ export default function App() {
           const k = wk(w.day)
           setWkts((prev) => ({ ...prev, [k]: (prev[k] || []).map((x) => (x.id === updated.id ? updated : x)) }))
         } else {
-          const created = await api.workouts.create({ ...w, week_offset: off })
+          const created = await api.workouts.create({ ...w, week_start: weekStartStr(off) })
           const k = wk(w.day)
           setWkts((prev) => ({ ...prev, [k]: [...(prev[k] || []), created] }))
 
@@ -236,7 +236,7 @@ export default function App() {
   const importW = async (parsed) => {
     if (user) {
       try {
-        const rows = await api.workouts.import_({ week_offset: off, week: parsed.week })
+        const rows = await api.workouts.import_({ week_start: weekStartStr(off), week: parsed.week })
         const grouped = {}
         for (const r of rows) {
           const k = `${off}|${r.day}`

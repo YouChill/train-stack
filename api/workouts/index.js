@@ -1,6 +1,28 @@
 import getPool from '../_db.js'
 import { verifyToken, cors } from '../_auth.js'
 
+// Ensure the absolute-week anchor column exists and is backfilled. Workouts used
+// to be stored with a relative `week_offset` which drifts as calendar weeks pass;
+// `week_start` (the Monday of the week) pins them to real dates instead.
+let schemaReady
+function ensureSchema(pool) {
+  if (!schemaReady) {
+    schemaReady = pool.query(`
+      ALTER TABLE workouts ADD COLUMN IF NOT EXISTS week_start DATE;
+      UPDATE workouts
+        SET week_start = (date_trunc('week', CURRENT_DATE))::date + (COALESCE(week_offset, 0) * 7)
+        WHERE week_start IS NULL;
+      CREATE INDEX IF NOT EXISTS idx_workouts_user_weekstart ON workouts(user_id, week_start);
+    `).catch((e) => { schemaReady = undefined; throw e })
+  }
+  return schemaReady
+}
+
+async function currentMonday(pool) {
+  const { rows } = await pool.query("SELECT (date_trunc('week', CURRENT_DATE))::date AS d")
+  return rows[0].d
+}
+
 export default async function handler(req, res) {
   cors(res)
   if (req.method === 'OPTIONS') return res.status(200).end()
@@ -11,6 +33,7 @@ export default async function handler(req, res) {
   const pool = getPool()
 
   try {
+    await ensureSchema(pool)
     const { id, action } = req.query
 
     // PUT /api/workouts?id=X — update workout
@@ -37,12 +60,12 @@ export default async function handler(req, res) {
       return res.json({ ok: true })
     }
 
-    // GET /api/workouts?week=X — list workouts
+    // GET /api/workouts?week_start=YYYY-MM-DD — list workouts for a week
     if (req.method === 'GET') {
-      const week = parseInt(req.query.week) || 0
+      const weekStart = req.query.week_start || (await currentMonday(pool))
       const { rows } = await pool.query(
-        'SELECT * FROM workouts WHERE user_id = $1 AND week_offset = $2 ORDER BY start_time ASC NULLS LAST, id',
-        [userId, week]
+        'SELECT * FROM workouts WHERE user_id = $1 AND week_start = $2 ORDER BY start_time ASC NULLS LAST, id',
+        [userId, weekStart]
       )
       return res.json(rows)
     }
@@ -50,19 +73,19 @@ export default async function handler(req, res) {
     if (req.method === 'POST') {
       // POST /api/workouts?action=import — bulk import week
       if (action === 'import') {
-        const { week_offset, week } = req.body
-        const off = week_offset ?? 0
+        const { week_start, week } = req.body
         if (!week) return res.status(400).json({ error: 'Brak klucza "week"' })
+        const ws = week_start || (await currentMonday(pool))
 
-        await pool.query('DELETE FROM workouts WHERE user_id = $1 AND week_offset = $2', [userId, off])
+        await pool.query('DELETE FROM workouts WHERE user_id = $1 AND week_start = $2', [userId, ws])
 
         const inserts = []
         for (const [day, list] of Object.entries(week)) {
           for (const w of list || []) {
             inserts.push(pool.query(
-              `INSERT INTO workouts (user_id, discipline, day, week_offset, title, notes, params, exercises, rest, done, start_time, recurrence)
+              `INSERT INTO workouts (user_id, discipline, day, week_start, title, notes, params, exercises, rest, done, start_time, recurrence)
                VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12)`,
-              [userId, w.discipline || '', day, off, w.title || '', w.notes || '',
+              [userId, w.discipline || '', day, ws, w.title || '', w.notes || '',
                JSON.stringify(w.params || []), JSON.stringify(w.exercises || []), w.rest || false, false,
                w.start_time || '', JSON.stringify(w.recurrence || null)]
             ))
@@ -71,18 +94,19 @@ export default async function handler(req, res) {
         await Promise.all(inserts)
 
         const { rows } = await pool.query(
-          'SELECT * FROM workouts WHERE user_id = $1 AND week_offset = $2 ORDER BY id',
-          [userId, off]
+          'SELECT * FROM workouts WHERE user_id = $1 AND week_start = $2 ORDER BY id',
+          [userId, ws]
         )
         return res.json(rows)
       }
 
       // POST /api/workouts — create single workout
-      const { discipline, day, week_offset, title, notes, params, exercises, rest, done, start_time, recurrence } = req.body
+      const { discipline, day, week_start, title, notes, params, exercises, rest, done, start_time, recurrence } = req.body
+      const ws = week_start || (await currentMonday(pool))
       const { rows } = await pool.query(
-        `INSERT INTO workouts (user_id, discipline, day, week_offset, title, notes, params, exercises, rest, done, start_time, recurrence)
+        `INSERT INTO workouts (user_id, discipline, day, week_start, title, notes, params, exercises, rest, done, start_time, recurrence)
          VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12) RETURNING *`,
-        [userId, discipline, day, week_offset || 0, title || '', notes || '',
+        [userId, discipline, day, ws, title || '', notes || '',
          JSON.stringify(params || []), JSON.stringify(exercises || []), rest || false, done || false,
          start_time || '', JSON.stringify(recurrence || null)]
       )
