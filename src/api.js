@@ -28,7 +28,7 @@ export const auth = {
 }
 
 export const workouts = {
-  list:    (week)     => request(`/api/workouts?week=${week}`),
+  list:    (weekStart) => request(`/api/workouts?week_start=${weekStart}`),
   create:  (body)     => request('/api/workouts',        { method: 'POST', body: JSON.stringify(body) }),
   update:  (id, body) => request(`/api/workouts?id=${id}`, { method: 'PUT',  body: JSON.stringify(body) }),
   remove:  (id)       => request(`/api/workouts?id=${id}`, { method: 'DELETE' }),

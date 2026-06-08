@@ -5,13 +5,18 @@ import auth from '../middleware/auth.js'
 const router = Router()
 router.use(auth)
 
-// GET /api/workouts?week=0
+async function currentMonday() {
+  const { rows } = await pool.query("SELECT (date_trunc('week', CURRENT_DATE))::date AS d")
+  return rows[0].d
+}
+
+// GET /api/workouts?week_start=YYYY-MM-DD
 router.get('/', async (req, res) => {
-  const week = parseInt(req.query.week) || 0
   try {
+    const weekStart = req.query.week_start || (await currentMonday())
     const { rows } = await pool.query(
-      'SELECT * FROM workouts WHERE user_id = $1 AND week_offset = $2 ORDER BY id',
-      [req.userId, week]
+      'SELECT * FROM workouts WHERE user_id = $1 AND week_start = $2 ORDER BY id',
+      [req.userId, weekStart]
     )
     res.json(rows)
   } catch {
@@ -21,12 +26,13 @@ router.get('/', async (req, res) => {
 
 // POST /api/workouts
 router.post('/', async (req, res) => {
-  const { discipline, day, week_offset, title, notes, params, exercises, rest, done } = req.body
+  const { discipline, day, week_start, title, notes, params, exercises, rest, done } = req.body
   try {
+    const ws = week_start || (await currentMonday())
     const { rows } = await pool.query(
-      `INSERT INTO workouts (user_id, discipline, day, week_offset, title, notes, params, exercises, rest, done)
+      `INSERT INTO workouts (user_id, discipline, day, week_start, title, notes, params, exercises, rest, done)
        VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10) RETURNING *`,
-      [req.userId, discipline, day, week_offset || 0, title || '', notes || '',
+      [req.userId, discipline, day, ws, title || '', notes || '',
        JSON.stringify(params || []), JSON.stringify(exercises || []), rest || false, done || false]
     )
     res.status(201).json(rows[0])
@@ -68,20 +74,20 @@ router.delete('/:id', async (req, res) => {
 
 // POST /api/workouts/import  — bulk import for a week
 router.post('/import', async (req, res) => {
-  const { week_offset, week } = req.body
-  const off = week_offset ?? 0
+  const { week_start, week } = req.body
   if (!week) return res.status(400).json({ error: 'Brak klucza "week"' })
 
   try {
-    await pool.query('DELETE FROM workouts WHERE user_id = $1 AND week_offset = $2', [req.userId, off])
+    const ws = week_start || (await currentMonday())
+    await pool.query('DELETE FROM workouts WHERE user_id = $1 AND week_start = $2', [req.userId, ws])
 
     const inserts = []
     for (const [day, list] of Object.entries(week)) {
       for (const w of list || []) {
         inserts.push(pool.query(
-          `INSERT INTO workouts (user_id, discipline, day, week_offset, title, notes, params, exercises, rest, done)
+          `INSERT INTO workouts (user_id, discipline, day, week_start, title, notes, params, exercises, rest, done)
            VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10)`,
-          [req.userId, w.discipline || '', day, off, w.title || '', w.notes || '',
+          [req.userId, w.discipline || '', day, ws, w.title || '', w.notes || '',
            JSON.stringify(w.params || []), JSON.stringify(w.exercises || []), w.rest || false, false]
         ))
       }
@@ -89,8 +95,8 @@ router.post('/import', async (req, res) => {
     await Promise.all(inserts)
 
     const { rows } = await pool.query(
-      'SELECT * FROM workouts WHERE user_id = $1 AND week_offset = $2 ORDER BY id',
-      [req.userId, off]
+      'SELECT * FROM workouts WHERE user_id = $1 AND week_start = $2 ORDER BY id',
+      [req.userId, ws]
     )
     res.json(rows)
   } catch {

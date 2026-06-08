@@ -26,6 +26,7 @@ CREATE TABLE IF NOT EXISTS workouts (
   discipline  VARCHAR(50) NOT NULL,
   day         VARCHAR(3) NOT NULL,
   week_offset INT DEFAULT 0,
+  week_start  DATE,
   title       VARCHAR(255) DEFAULT '',
   notes       TEXT DEFAULT '',
   params      JSONB DEFAULT '[]',
@@ -36,6 +37,7 @@ CREATE TABLE IF NOT EXISTS workouts (
 );
 
 CREATE INDEX IF NOT EXISTS idx_workouts_user_week ON workouts(user_id, week_offset);
+CREATE INDEX IF NOT EXISTS idx_workouts_user_weekstart ON workouts(user_id, week_start);
 CREATE INDEX IF NOT EXISTS idx_disciplines_user ON disciplines(user_id);
 
 CREATE TABLE IF NOT EXISTS password_resets (
