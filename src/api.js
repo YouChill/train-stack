@@ -50,6 +50,7 @@ export const logs = {
 
 export const exerciseLogs = {
   forExercise: (name)     => request(`/api/exercise-logs?exercise_name=${encodeURIComponent(name)}`),
+  names:       ()         => request('/api/exercise-logs?names=1'),
   save:        (body)     => request('/api/exercise-logs',          { method: 'POST', body: JSON.stringify(body) }),
   update:      (id, body) => request(`/api/exercise-logs?id=${id}`, { method: 'PUT',  body: JSON.stringify(body) }),
   remove:      (id)       => request(`/api/exercise-logs?id=${id}`, { method: 'DELETE' }),

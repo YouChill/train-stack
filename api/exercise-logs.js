@@ -32,6 +32,29 @@ export default async function handler(req, res) {
       return res.json(rows[0])
     }
 
+    if (req.method === 'GET' && req.query.names) {
+      const { rows } = await pool.query(
+        `SELECT name, MAX(last_logged) AS last_logged, SUM(cnt)::int AS cnt
+         FROM (
+           SELECT exercise_name AS name, MAX(logged_date)::text AS last_logged, COUNT(*) AS cnt
+           FROM exercise_logs
+           WHERE user_id = $1
+           GROUP BY exercise_name
+           UNION ALL
+           SELECT btrim(e->>'name') AS name, NULL::text AS last_logged, COUNT(*) AS cnt
+           FROM workouts w
+           CROSS JOIN LATERAL jsonb_array_elements(COALESCE(w.exercises, '[]'::jsonb)) AS e
+           WHERE w.user_id = $1 AND COALESCE(btrim(e->>'name'), '') <> ''
+           GROUP BY btrim(e->>'name')
+         ) t
+         GROUP BY name
+         ORDER BY last_logged DESC NULLS LAST, cnt DESC, name ASC
+         LIMIT 200`,
+        [userId]
+      )
+      return res.json(rows.map((r) => r.name))
+    }
+
     if (req.method === 'GET') {
       const { exercise_name } = req.query
       if (!exercise_name) return res.status(400).json({ error: 'Podaj exercise_name' })

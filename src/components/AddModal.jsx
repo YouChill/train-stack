@@ -1,6 +1,7 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Check, Clock, Minus, Plus, Repeat, X } from 'lucide-react'
 import { DAYS, UNITS, LOAD_UNITS, RECURRENCE_OPTIONS } from '../constants.js'
+import * as api from '../api.js'
 
 export default function AddModal({ targetDay, workout, prefillTime, discs, onSave, onClose }) {
   const initDisc = workout?.discipline || discs[0]?.id || ''
@@ -27,6 +28,15 @@ export default function AddModal({ targetDay, workout, prefillTime, discs, onSav
   )
 
   const disc = discs.find((d) => d.id === discId) || discs[0]
+
+  // Wcześniej używane nazwy ćwiczeń — do podpowiedzi przy ręcznej edycji,
+  // żeby nie rozdzielać historii przez literówkę albo inną kolejność słów.
+  const [exNames, setExNames] = useState([])
+  useEffect(() => {
+    api.exerciseLogs.names()
+      .then((names) => Array.isArray(names) && setExNames(names))
+      .catch(() => {})
+  }, [])
 
   const changeDisc = (id) => {
     setDiscId(id)
@@ -218,9 +228,15 @@ export default function AddModal({ targetDay, workout, prefillTime, discs, onSav
                       ))}
                     </div>
                   )}
+                  {exNames.length > 0 && (
+                    <datalist id="tp-ex-names">
+                      {exNames.map((n) => <option key={n} value={n} />)}
+                    </datalist>
+                  )}
                   {exs.map((ex, i) => (
                     <div key={i} className="tp-er">
                       <input className="tp-sm" placeholder="Bench Press" value={ex.name}
+                        list="tp-ex-names" autoComplete="off"
                         onChange={(e) => setE(i, 'name', e.target.value)} />
                       <input className="tp-sm" placeholder="4" value={ex.sets}
                         onChange={(e) => setE(i, 'sets', e.target.value)} />
