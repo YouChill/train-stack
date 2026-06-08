@@ -80,7 +80,9 @@ export default function AddModal({ targetDay, workout, prefillTime, discs, onSav
       start_time: startTime,
       recurrence: buildRecurrence(),
       params: params.filter((p) => p.key || p.value),
-      exercises: exs.filter((e) => e.name),
+      exercises: exs
+        .map((e) => ({ ...e, name: e.name.trim().replace(/\s+/g, ' ') }))
+        .filter((e) => e.name),
       rest,
       done: workout?.done || false,
     })
