@@ -120,11 +120,9 @@ export default function App() {
   const fetchLogCounts = useCallback(async () => {
     if (!user) return
     try {
-      const allLogs = await api.logs.all()
+      const rows = await api.logs.counts()
       const counts = {}
-      for (const l of allLogs) {
-        counts[l.workout_id] = (counts[l.workout_id] || 0) + 1
-      }
+      for (const r of rows) counts[r.workout_id] = r.count
       setLogCounts(counts)
     } catch {}
   }, [user])
@@ -215,12 +213,24 @@ export default function App() {
 
   const del = async (day, id) => {
     const k = wk(day)
+    const before = wkts[k] || []
     setWkts((prev) => ({ ...prev, [k]: (prev[k] || []).filter((w) => w.id !== id) }))
-    if (user) { try { await api.workouts.remove(id) } catch {} }
+    if (user) {
+      try {
+        await api.workouts.remove(id)
+      } catch (e) {
+        // 404 = już nie istnieje na serwerze, lokalne usunięcie jest poprawne
+        if (e.status !== 404) {
+          setWkts((prev) => ({ ...prev, [k]: before }))
+          alert('Nie udało się usunąć: ' + e.message)
+        }
+      }
+    }
   }
 
   const toggle = async (day, id) => {
     const k = wk(day)
+    const before = wkts[k] || []
     let toggled
     setWkts((prev) => ({
       ...prev,
@@ -229,7 +239,14 @@ export default function App() {
         return w
       }),
     }))
-    if (user && toggled) { try { await api.workouts.update(id, toggled) } catch {} }
+    if (user && toggled) {
+      try {
+        await api.workouts.update(id, toggled)
+      } catch (e) {
+        setWkts((prev) => ({ ...prev, [k]: before }))
+        alert('Nie udało się zapisać: ' + e.message)
+      }
+    }
   }
 
   // ── IMPORT ────────────────────────────────────────────────────────────────
