@@ -31,10 +31,11 @@ export default async function handler(req, res) {
 
     if (req.method === 'PUT' && id) {
       const { sets, logged_date } = req.body
+      // Brak logged_date w body nie może nadpisać daty NULL-em (kolumna NOT NULL).
       const { rows } = await pool.query(
-        `UPDATE exercise_logs SET sets=$1, logged_date=$2
+        `UPDATE exercise_logs SET sets=$1, logged_date=COALESCE($2, logged_date)
          WHERE id=$3 AND user_id=$4 RETURNING *`,
-        [JSON.stringify(sets || []), logged_date, id, userId]
+        [JSON.stringify(sets || []), logged_date || null, id, userId]
       )
       if (!rows.length) return res.status(404).json({ error: 'Nie znaleziono' })
       return res.json(rows[0])

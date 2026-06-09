@@ -19,7 +19,7 @@ export default async function handler(req, res) {
       const { rows } = await pool.query(
         `UPDATE workout_logs SET note=$1, feeling=$2, actual_params=$3, actual_exercises=$4
          WHERE id=$5 AND user_id=$6 RETURNING *`,
-        [note || '', feeling || 3,
+        [note ?? '', feeling ?? 3,
          JSON.stringify(actual_params || []), JSON.stringify(actual_exercises || []),
          id, userId]
       )
@@ -36,9 +36,18 @@ export default async function handler(req, res) {
       return res.json({ ok: true })
     }
 
-    // GET /api/logs?workout_id=X or ?all=1
+    // GET /api/logs?counts=1 or ?workout_id=X or ?all=1
     if (req.method === 'GET') {
-      const { workout_id, all } = req.query
+      const { workout_id, all, counts } = req.query
+      // Liczniki per trening liczone w bazie — lista z all=1 jest obcinana
+      // (LIMIT 200), więc nie nadaje się do zliczania.
+      if (counts) {
+        const { rows } = await pool.query(
+          'SELECT workout_id, COUNT(*)::int AS count FROM workout_logs WHERE user_id = $1 GROUP BY workout_id',
+          [userId]
+        )
+        return res.json(rows)
+      }
       if (all) {
         const { rows } = await pool.query(
           `SELECT wl.*, w.title, w.discipline, w.day, w.week_offset, w.start_time
@@ -69,7 +78,7 @@ export default async function handler(req, res) {
       const { rows } = await pool.query(
         `INSERT INTO workout_logs (user_id, workout_id, note, feeling, actual_params, actual_exercises)
          VALUES ($1,$2,$3,$4,$5,$6) RETURNING *`,
-        [userId, workout_id, note || '', feeling || 3,
+        [userId, workout_id, note ?? '', feeling ?? 3,
          JSON.stringify(actual_params || []), JSON.stringify(actual_exercises || [])]
       )
       return res.status(201).json(rows[0])

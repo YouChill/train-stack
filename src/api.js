@@ -15,7 +15,11 @@ async function request(path, opts = {}) {
   const text = await res.text()
   let data
   try { data = JSON.parse(text) } catch { throw new Error('Serwer zwrócił nieprawidłową odpowiedź') }
-  if (!res.ok) throw new Error(data.error || 'Błąd serwera')
+  if (!res.ok) {
+    const err = new Error(data.error || 'Błąd serwera')
+    err.status = res.status
+    throw err
+  }
   return data
 }
 
@@ -43,6 +47,7 @@ export const disciplines = {
 export const logs = {
   forWorkout: (wid)    => request(`/api/logs?workout_id=${wid}`),
   all:        ()       => request('/api/logs?all=1'),
+  counts:     ()       => request('/api/logs?counts=1'),
   create:     (body)   => request('/api/logs',       { method: 'POST', body: JSON.stringify(body) }),
   update:     (id, b)  => request(`/api/logs?id=${id}`, { method: 'PUT',  body: JSON.stringify(b) }),
   remove:     (id)     => request(`/api/logs?id=${id}`, { method: 'DELETE' }),
