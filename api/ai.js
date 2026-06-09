@@ -1,4 +1,4 @@
-import { verifyToken, cors } from './_auth.js'
+import { verifyUser, cors } from './_auth.js'
 import { rateLimit } from './_ratelimit.js'
 import getPool from './_db.js'
 
@@ -32,7 +32,7 @@ export default async function handler(req, res) {
   if (req.method === 'OPTIONS') return res.status(200).end()
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' })
 
-  const payload = verifyToken(req)
+  const payload = await verifyUser(req, getPool())
   if (!payload) return res.status(401).json({ error: 'Brak tokenu' })
 
   // Każde wywołanie kosztuje pieniądze (OpenAI) — twardy limit per użytkownik.

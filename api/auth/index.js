@@ -1,8 +1,7 @@
 import crypto from 'crypto'
 import bcrypt from 'bcryptjs'
-import jwt from 'jsonwebtoken'
 import getPool from '../_db.js'
-import { signToken, cors } from '../_auth.js'
+import { signToken, verifyUser, ensureTokenVersion, cors } from '../_auth.js'
 import { rateLimit, clientIp } from '../_ratelimit.js'
 import { sendMail, resetEmailHtml } from '../_mail.js'
 
@@ -46,15 +45,14 @@ export default async function handler(req, res) {
 
   // GET /api/auth?action=me
   if (action === 'me') {
-    const h = req.headers.authorization
-    if (!h?.startsWith('Bearer ')) return res.status(401).json({ error: 'Brak tokenu' })
+    const payload = await verifyUser(req, pool)
+    if (!payload) return res.status(401).json({ error: 'Nieprawidłowy token' })
     try {
-      const { id } = jwt.verify(h.slice(7), process.env.JWT_SECRET)
-      const { rows } = await pool.query('SELECT id, email, name FROM users WHERE id = $1', [id])
+      const { rows } = await pool.query('SELECT id, email, name FROM users WHERE id = $1', [payload.id])
       if (!rows.length) return res.status(401).json({ error: 'Użytkownik nie istnieje' })
       return res.json({ user: rows[0] })
     } catch {
-      return res.status(401).json({ error: 'Nieprawidłowy token' })
+      return res.status(500).json({ error: 'Błąd serwera' })
     }
   }
 
@@ -104,15 +102,19 @@ export default async function handler(req, res) {
     ])
     if (!ipOk || !emailOk) return res.status(429).json(RATE_LIMITED)
     try {
+      await ensureTokenVersion(pool)
       const { rows } = await pool.query(
-        'SELECT id, email, name, password FROM users WHERE email = $1',
+        'SELECT id, email, name, password, token_version FROM users WHERE email = $1',
         [emailNorm]
       )
       if (!rows.length) return res.status(401).json({ error: 'Nieprawidłowe dane' })
       const user = rows[0]
       const ok = await bcrypt.compare(password, user.password)
       if (!ok) return res.status(401).json({ error: 'Nieprawidłowe dane' })
-      return res.json({ user: { id: user.id, email: user.email, name: user.name }, token: signToken(user.id) })
+      return res.json({
+        user: { id: user.id, email: user.email, name: user.name },
+        token: signToken(user.id, user.token_version),
+      })
     } catch {
       return res.status(500).json({ error: 'Błąd serwera' })
     }
@@ -188,8 +190,14 @@ export default async function handler(req, res) {
       if (new Date(r.expires_at).getTime() < Date.now()) {
         return res.status(400).json({ error: 'Link wygasł' })
       }
+      await ensureTokenVersion(pool)
       const hash = await bcrypt.hash(password, 10)
-      await pool.query('UPDATE users SET password = $1 WHERE id = $2', [hash, r.user_id])
+      // Bump token_version: unieważnia wszystkie JWT wydane przed resetem.
+      const { rows: urows } = await pool.query(
+        `UPDATE users SET password = $1, token_version = token_version + 1
+         WHERE id = $2 RETURNING id, email, name, token_version`,
+        [hash, r.user_id]
+      )
       await pool.query('UPDATE password_resets SET used_at = NOW() WHERE token_hash = $1', [tokenHash])
       // Invalidate other outstanding resets for this user.
       await pool.query(
@@ -197,12 +205,11 @@ export default async function handler(req, res) {
          WHERE user_id = $1 AND used_at IS NULL`,
         [r.user_id]
       )
-      const { rows: urows } = await pool.query(
-        'SELECT id, email, name FROM users WHERE id = $1',
-        [r.user_id]
-      )
       const user = urows[0]
-      return res.json({ user, token: signToken(user.id) })
+      return res.json({
+        user: { id: user.id, email: user.email, name: user.name },
+        token: signToken(user.id, user.token_version),
+      })
     } catch (e) {
       console.error('reset-password error:', e)
       return res.status(500).json({ error: 'Błąd serwera' })
