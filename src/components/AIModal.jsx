@@ -1,7 +1,6 @@
 import { useState } from 'react'
 import { Check, Sparkles, X } from 'lucide-react'
-
-const API_URL = 'https://api.anthropic.com/v1/messages'
+import * as api from '../api.js'
 
 export default function AIModal({ discs, onImport, onClose }) {
   const [prompt,  setPrompt]  = useState('')
@@ -14,45 +13,10 @@ export default function AIModal({ discs, onImport, onClose }) {
     setLoading(true); setErr(''); setPreview(null)
 
     try {
-      const dlist = discs.map((d) => `${d.name} (id:"${d.id}")`).join(', ')
-
-      const res = await fetch(API_URL, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          model: 'claude-sonnet-4-20250514',
-          max_tokens: 2000,
-          messages: [{
-            role: 'user',
-            content: `Jesteś doświadczonym trenerem sportowym. Wygeneruj tygodniowy plan treningowy w JSON.
-
-Dostępne dyscypliny: ${dlist}
-Prośba: ${prompt}
-
-Odpowiedz TYLKO poprawnym JSON:
-{
-  "week": {
-    "mon": [{"discipline":"run","title":"Poranny bieg","params":[{"key":"Dystans","value":"10","unit":"km"},{"key":"Czas","value":"55","unit":"min"}],"exercises":[],"notes":"","rest":false}],
-    "tue": [],
-    "wed": [{"discipline":"gym","title":"Siłownia górna","params":[],"exercises":[{"name":"Bench Press","sets":"4","reps":"8","load":"80","loadUnit":"kg"}],"notes":"","rest":false}],
-    "thu": [],
-    "fri": [{"discipline":"stretch","title":"Rozciąganie","params":[{"key":"Czas trwania","value":"20","unit":"min"}],"exercises":[{"name":"Skłon do przodu","sets":"2","reps":"1","load":"30","loadUnit":"sek"},{"name":"Pozycja gołębia","sets":"2","reps":"1","load":"45","loadUnit":"sek"}],"notes":"","rest":false}],
-    "sat": [],
-    "sun": [{"discipline":"run","title":"Odpoczynek","params":[],"exercises":[],"notes":"","rest":true}]
-  }
-}
-Zasady: dni bez treningu = []. Dla biegania/pływania używaj params. Dla siłowni/boksu używaj exercises (sets/reps/load/loadUnit). Dla rozciągania (stretch) używaj exercises gdzie load = czas utrzymania pozycji a loadUnit = "sek". Dostosuj do prośby. TYLKO JSON.`,
-          }],
-        }),
+      const parsed = await api.ai.generate({
+        prompt: prompt.trim(),
+        disciplines: discs.map((d) => ({ id: d.id, name: d.name })),
       })
-
-      const data = await res.json()
-      if (data.error) throw new Error(data.error.message)
-
-      const raw   = data.content?.[0]?.text || ''
-      const clean = raw.replace(/```json\s*|\s*```/g, '').trim()
-      const parsed = JSON.parse(clean)
-      if (!parsed.week) throw new Error('Brak klucza "week"')
       setPreview(parsed)
     } catch (e) {
       setErr('Błąd: ' + e.message)

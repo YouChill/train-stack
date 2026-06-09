@@ -59,3 +59,7 @@ export const exerciseLogs = {
 export const stats = {
   get: () => request('/api/stats'),
 }
+
+export const ai = {
+  generate: (body) => request('/api/ai', { method: 'POST', body: JSON.stringify(body) }),
+}
