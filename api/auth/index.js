@@ -21,12 +21,18 @@ async function ensureResetTable(pool) {
 
 const hashToken = (t) => crypto.createHash('sha256').update(t).digest('hex')
 
-function appUrl(req) {
-  if (process.env.APP_URL) return process.env.APP_URL.replace(/\/$/, '')
-  const proto = req.headers['x-forwarded-proto'] || 'https'
-  const host = req.headers['x-forwarded-host'] || req.headers.host
-  return `${proto}://${host}`
+// Linki resetujące budujemy wyłącznie z APP_URL — fallback na nagłówki
+// x-forwarded-* pozwalałby atakującemu podstawić własną domenę w mailu
+// (password reset poisoning).
+function appUrl() {
+  if (!process.env.APP_URL) {
+    throw new Error('APP_URL nie jest skonfigurowany — wymagany do linków resetujących')
+  }
+  return process.env.APP_URL.replace(/\/$/, '')
 }
+
+const MIN_PASSWORD_LENGTH = 8
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
 export default async function handler(req, res) {
   cors(res)
@@ -55,18 +61,29 @@ export default async function handler(req, res) {
   if (action === 'register') {
     const { email, password, name } = req.body
     if (!email || !password || !name) return res.status(400).json({ error: 'Wymagane: email, password, name' })
+    const emailNorm = String(email).toLowerCase().trim()
+    const nameNorm = String(name).trim()
+    if (!EMAIL_RE.test(emailNorm) || emailNorm.length > 255) {
+      return res.status(400).json({ error: 'Nieprawidłowy adres email' })
+    }
+    if (String(password).length < MIN_PASSWORD_LENGTH) {
+      return res.status(400).json({ error: `Hasło musi mieć min. ${MIN_PASSWORD_LENGTH} znaków` })
+    }
+    if (!nameNorm || nameNorm.length > 100) {
+      return res.status(400).json({ error: 'Imię musi mieć od 1 do 100 znaków' })
+    }
     try {
       const hash = await bcrypt.hash(password, 10)
       const { rows } = await pool.query(
         'INSERT INTO users (email, password, name) VALUES ($1, $2, $3) RETURNING id, email, name',
-        [email.toLowerCase().trim(), hash, name.trim()]
+        [emailNorm, hash, nameNorm]
       )
       const user = rows[0]
       return res.status(201).json({ user, token: signToken(user.id) })
     } catch (e) {
       if (e.code === '23505') return res.status(409).json({ error: 'Email już istnieje' })
       console.error('Register error:', e)
-      return res.status(500).json({ error: 'Błąd serwera', detail: e.message })
+      return res.status(500).json({ error: 'Błąd serwera' })
     }
   }
 
@@ -109,7 +126,7 @@ export default async function handler(req, res) {
           'INSERT INTO password_resets (token_hash, user_id, expires_at) VALUES ($1, $2, $3)',
           [tokenHash, user.id, expires]
         )
-        const link = `${appUrl(req)}/?reset=${token}`
+        const link = `${appUrl()}/?reset=${token}`
         try {
           await sendMail({
             to: user.email,
@@ -132,7 +149,9 @@ export default async function handler(req, res) {
   if (action === 'reset-password') {
     const { token, password } = req.body || {}
     if (!token || !password) return res.status(400).json({ error: 'Wymagane: token, password' })
-    if (password.length < 6) return res.status(400).json({ error: 'Hasło musi mieć min. 6 znaków' })
+    if (String(password).length < MIN_PASSWORD_LENGTH) {
+      return res.status(400).json({ error: `Hasło musi mieć min. ${MIN_PASSWORD_LENGTH} znaków` })
+    }
     try {
       await ensureResetTable(pool)
       const tokenHash = hashToken(token)

@@ -12,7 +12,7 @@ export default function ResetPasswordModal({ token, onDone, onCancel }) {
     e.preventDefault()
     setErr('')
     if (password !== confirm) { setErr('Hasła nie są zgodne'); return }
-    if (password.length < 6) { setErr('Hasło musi mieć min. 6 znaków'); return }
+    if (password.length < 8) { setErr('Hasło musi mieć min. 8 znaków'); return }
     setLoading(true)
     try {
       const data = await api.auth.resetPassword({ token, password })
@@ -38,11 +38,11 @@ export default function ResetPasswordModal({ token, onDone, onCancel }) {
               <input
                 className="tp-inp"
                 type="password"
-                placeholder="Min. 6 znaków"
+                placeholder="Min. 8 znaków"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
-                minLength={6}
+                minLength={8}
                 autoFocus
               />
             </div>
@@ -55,7 +55,7 @@ export default function ResetPasswordModal({ token, onDone, onCancel }) {
                 value={confirm}
                 onChange={(e) => setConfirm(e.target.value)}
                 required
-                minLength={6}
+                minLength={8}
               />
             </div>
 
