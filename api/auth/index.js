@@ -3,6 +3,7 @@ import bcrypt from 'bcryptjs'
 import jwt from 'jsonwebtoken'
 import getPool from '../_db.js'
 import { signToken, cors } from '../_auth.js'
+import { rateLimit, clientIp } from '../_ratelimit.js'
 import { sendMail, resetEmailHtml } from '../_mail.js'
 
 const RESET_TTL_MIN = 60
@@ -33,6 +34,8 @@ function appUrl() {
 
 const MIN_PASSWORD_LENGTH = 8
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+
+const RATE_LIMITED = { error: 'Zbyt wiele prób. Spróbuj ponownie później.' }
 
 export default async function handler(req, res) {
   cors(res)
@@ -72,6 +75,9 @@ export default async function handler(req, res) {
     if (!nameNorm || nameNorm.length > 100) {
       return res.status(400).json({ error: 'Imię musi mieć od 1 do 100 znaków' })
     }
+    if (!(await rateLimit(pool, `register:ip:${clientIp(req)}`, 5, 3600))) {
+      return res.status(429).json(RATE_LIMITED)
+    }
     try {
       const hash = await bcrypt.hash(password, 10)
       const { rows } = await pool.query(
@@ -91,10 +97,16 @@ export default async function handler(req, res) {
   if (action === 'login') {
     const { email, password } = req.body
     if (!email || !password) return res.status(400).json({ error: 'Wymagane: email, password' })
+    const emailNorm = String(email).toLowerCase().trim()
+    const [ipOk, emailOk] = await Promise.all([
+      rateLimit(pool, `login:ip:${clientIp(req)}`, 20, 900),
+      rateLimit(pool, `login:email:${emailNorm}`, 10, 900),
+    ])
+    if (!ipOk || !emailOk) return res.status(429).json(RATE_LIMITED)
     try {
       const { rows } = await pool.query(
         'SELECT id, email, name, password FROM users WHERE email = $1',
-        [email.toLowerCase().trim()]
+        [emailNorm]
       )
       if (!rows.length) return res.status(401).json({ error: 'Nieprawidłowe dane' })
       const user = rows[0]
@@ -110,11 +122,19 @@ export default async function handler(req, res) {
   if (action === 'request-reset') {
     const { email } = req.body || {}
     if (!email) return res.status(400).json({ error: 'Wymagany: email' })
+    const emailNorm = String(email).toLowerCase().trim()
+    // Limit per email i per IP: każde trafienie wysyła prawdziwy mail z naszego
+    // konta Gmail, więc bez limitu endpoint nadaje się do mail-bombingu.
+    const [ipOk, emailOk] = await Promise.all([
+      rateLimit(pool, `reset-req:ip:${clientIp(req)}`, 10, 3600),
+      rateLimit(pool, `reset-req:email:${emailNorm}`, 3, 3600),
+    ])
+    if (!ipOk || !emailOk) return res.status(429).json(RATE_LIMITED)
     try {
       await ensureResetTable(pool)
       const { rows } = await pool.query(
         'SELECT id, email, name FROM users WHERE email = $1',
-        [email.toLowerCase().trim()]
+        [emailNorm]
       )
       // Always return 200 to avoid leaking whether the email exists.
       if (rows.length) {
@@ -151,6 +171,9 @@ export default async function handler(req, res) {
     if (!token || !password) return res.status(400).json({ error: 'Wymagane: token, password' })
     if (String(password).length < MIN_PASSWORD_LENGTH) {
       return res.status(400).json({ error: `Hasło musi mieć min. ${MIN_PASSWORD_LENGTH} znaków` })
+    }
+    if (!(await rateLimit(pool, `reset-pw:ip:${clientIp(req)}`, 10, 3600))) {
+      return res.status(429).json(RATE_LIMITED)
     }
     try {
       await ensureResetTable(pool)
