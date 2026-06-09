@@ -77,21 +77,30 @@ export default async function handler(req, res) {
         if (!week) return res.status(400).json({ error: 'Brak klucza "week"' })
         const ws = week_start || (await currentMonday(pool))
 
-        await pool.query('DELETE FROM workouts WHERE user_id = $1 AND week_start = $2', [userId, ws])
-
-        const inserts = []
-        for (const [day, list] of Object.entries(week)) {
-          for (const w of list || []) {
-            inserts.push(pool.query(
-              `INSERT INTO workouts (user_id, discipline, day, week_start, title, notes, params, exercises, rest, done, start_time, recurrence)
-               VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12)`,
-              [userId, w.discipline || '', day, ws, w.title || '', w.notes || '',
-               JSON.stringify(w.params || []), JSON.stringify(w.exercises || []), w.rest || false, false,
-               w.start_time || '', JSON.stringify(w.recurrence || null)]
-            ))
+        // Wymiana całego tygodnia w jednej transakcji — błąd przy dowolnym
+        // insercie nie może skasować dotychczasowego planu.
+        const client = await pool.connect()
+        try {
+          await client.query('BEGIN')
+          await client.query('DELETE FROM workouts WHERE user_id = $1 AND week_start = $2', [userId, ws])
+          for (const [day, list] of Object.entries(week)) {
+            for (const w of list || []) {
+              await client.query(
+                `INSERT INTO workouts (user_id, discipline, day, week_start, title, notes, params, exercises, rest, done, start_time, recurrence)
+                 VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12)`,
+                [userId, w.discipline || '', day, ws, w.title || '', w.notes || '',
+                 JSON.stringify(w.params || []), JSON.stringify(w.exercises || []), w.rest || false, false,
+                 w.start_time || '', JSON.stringify(w.recurrence || null)]
+              )
+            }
           }
+          await client.query('COMMIT')
+        } catch (e) {
+          await client.query('ROLLBACK').catch(() => {})
+          throw e
+        } finally {
+          client.release()
         }
-        await Promise.all(inserts)
 
         const { rows } = await pool.query(
           'SELECT * FROM workouts WHERE user_id = $1 AND week_start = $2 ORDER BY id',
