@@ -93,11 +93,11 @@ export default function AuthModal({ onAuth }) {
                 <input
                   className="tp-inp"
                   type="password"
-                  placeholder="Min. 6 znaków"
+                  placeholder="Min. 8 znaków"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   required
-                  minLength={6}
+                  minLength={8}
                 />
               </div>
             )}

@@ -15,7 +15,10 @@ export function verifyToken(req) {
 }
 
 export function cors(res) {
-  res.setHeader('Access-Control-Allow-Origin', '*')
+  // Frontend i API żyją na tej samej domenie (APP_URL); nie otwieramy API
+  // dla dowolnych originów.
+  const origin = process.env.APP_URL ? process.env.APP_URL.replace(/\/$/, '') : '*'
+  res.setHeader('Access-Control-Allow-Origin', origin)
   res.setHeader('Access-Control-Allow-Methods', 'GET,POST,PUT,DELETE,OPTIONS')
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type,Authorization')
 }

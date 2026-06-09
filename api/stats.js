@@ -49,6 +49,6 @@ export default async function handler(req, res) {
     })
   } catch (e) {
     console.error('Stats error:', e)
-    res.status(500).json({ error: 'Błąd serwera', detail: e.message })
+    res.status(500).json({ error: 'Błąd serwera' })
   }
 }

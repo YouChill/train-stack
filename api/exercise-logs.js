@@ -86,6 +86,6 @@ export default async function handler(req, res) {
     res.status(405).json({ error: 'Method not allowed' })
   } catch (e) {
     console.error('Exercise logs error:', e)
-    res.status(500).json({ error: 'Błąd serwera', detail: e.message })
+    res.status(500).json({ error: 'Błąd serwera' })
   }
 }
