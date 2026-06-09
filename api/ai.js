@@ -1,4 +1,6 @@
 import { verifyToken, cors } from './_auth.js'
+import { rateLimit } from './_ratelimit.js'
+import getPool from './_db.js'
 
 const OPENAI_URL = 'https://api.openai.com/v1/chat/completions'
 const MAX_PROMPT_LEN = 2000
@@ -32,6 +34,11 @@ export default async function handler(req, res) {
 
   const payload = verifyToken(req)
   if (!payload) return res.status(401).json({ error: 'Brak tokenu' })
+
+  // Każde wywołanie kosztuje pieniądze (OpenAI) — twardy limit per użytkownik.
+  if (!(await rateLimit(getPool(), `ai:user:${payload.id}`, 20, 3600))) {
+    return res.status(429).json({ error: 'Zbyt wiele generowań. Spróbuj ponownie za godzinę.' })
+  }
 
   const apiKey = process.env.OPENAI_API_KEY
   if (!apiKey) {
