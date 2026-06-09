@@ -1,5 +1,5 @@
 import getPool from '../_db.js'
-import { verifyToken, cors } from '../_auth.js'
+import { verifyUser, cors } from '../_auth.js'
 
 // Ensure the absolute-week anchor column exists and is backfilled. Workouts used
 // to be stored with a relative `week_offset` which drifts as calendar weeks pass;
@@ -27,10 +27,10 @@ export default async function handler(req, res) {
   cors(res)
   if (req.method === 'OPTIONS') return res.status(200).end()
 
-  const payload = verifyToken(req)
+  const pool = getPool()
+  const payload = await verifyUser(req, pool)
   if (!payload) return res.status(401).json({ error: 'Brak tokenu' })
   const userId = payload.id
-  const pool = getPool()
 
   try {
     await ensureSchema(pool)
