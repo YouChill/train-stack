@@ -51,7 +51,8 @@ export default async function handler(req, res) {
       const { rows } = await pool.query('SELECT id, email, name FROM users WHERE id = $1', [payload.id])
       if (!rows.length) return res.status(401).json({ error: 'Użytkownik nie istnieje' })
       return res.json({ user: rows[0] })
-    } catch {
+    } catch (e) {
+      console.error('Auth me error:', e)
       return res.status(500).json({ error: 'Błąd serwera' })
     }
   }
@@ -115,7 +116,8 @@ export default async function handler(req, res) {
         user: { id: user.id, email: user.email, name: user.name },
         token: signToken(user.id, user.token_version),
       })
-    } catch {
+    } catch (e) {
+      console.error('Login error:', e)
       return res.status(500).json({ error: 'Błąd serwera' })
     }
   }
