@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { ChevronLeft, ChevronRight, Plus, Save, Trash2, TrendingUp, X } from 'lucide-react'
 import * as api from '../api.js'
+import { toast } from './Toasts.jsx'
 
 const today = () => new Date().toISOString().slice(0, 10)
 
@@ -128,7 +129,7 @@ export default function ExerciseModal({ workout, exercise, discs, onClose }) {
       setSaved(true)
       setTimeout(() => setSaved(false), 2000)
     } catch (e) {
-      alert('Błąd zapisu: ' + e.message)
+      toast('Błąd zapisu: ' + e.message)
     } finally {
       setSaving(false)
     }

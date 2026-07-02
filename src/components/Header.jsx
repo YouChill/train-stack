@@ -1,4 +1,5 @@
-import { BarChart3, ChevronLeft, ChevronRight, Grid, Layers, LogOut, Plus, Settings, Sparkles, Upload } from 'lucide-react'
+import { useEffect, useRef, useState } from 'react'
+import { BarChart3, ChevronLeft, ChevronRight, Grid, Layers, LogOut, MoreVertical, Plus, Settings, Sparkles, Upload } from 'lucide-react'
 
 const MONTHS_GEN = ['stycznia','lutego','marca','kwietnia','maja','czerwca','lipca','sierpnia','września','października','listopada','grudnia']
 
@@ -20,6 +21,18 @@ export default function Header({
   const pct = stats.total > 0 ? Math.round((stats.done / stats.total) * 100) : 0
   const selectedDay = days.find((d) => d.key === selDay)
   const wrange = view === 'week' ? fmtWeekRange(days) : fmtDayLabel(selectedDay)
+
+  const [menu, setMenu] = useState(false)
+  const menuRef = useRef(null)
+
+  useEffect(() => {
+    if (!menu) return
+    const close = (e) => { if (!menuRef.current?.contains(e.target)) setMenu(false) }
+    document.addEventListener('mousedown', close)
+    return () => document.removeEventListener('mousedown', close)
+  }, [menu])
+
+  const pick = (fn) => () => { setMenu(false); fn() }
 
   return (
     <header className="tp-hdr">
@@ -54,19 +67,28 @@ export default function Header({
 
       <div className="tp-spacer" />
 
-      <button className="tp-hbtn-ic" onClick={onStats} title="Statystyki"><BarChart3 size={14} /></button>
-      <button className="tp-hbtn-ic" onClick={onCat} title="Kategorie"><Settings size={14} /></button>
-      <button className="tp-hbtn" onClick={onImport}><Upload size={12} /> <span className="tp-hbtn-text">Import</span></button>
       <button className="tp-hbtn tp-btn-ai" onClick={onAI}><Sparkles size={12} /> <span className="tp-hbtn-text">Generuj AI</span></button>
       <button className="tp-hbtn tp-btn-lime" onClick={onAdd}><Plus size={12} /> <span className="tp-hbtn-text">Dodaj</span></button>
 
-      {user && (
-        <>
-          <div className="tp-div" />
-          <span className="tp-user-name">{user.name}</span>
-          <button className="tp-hbtn-ic" onClick={onLogout} title="Wyloguj"><LogOut size={14} /></button>
-        </>
-      )}
+      <div className="tp-menu-wrap" ref={menuRef}>
+        <button className="tp-hbtn-ic" onClick={() => setMenu((m) => !m)} title="Więcej opcji">
+          <MoreVertical size={14} />
+        </button>
+        {menu && (
+          <div className="tp-menu">
+            <button className="tp-menu-it" onClick={pick(onImport)}><Upload size={13} /> Import JSON</button>
+            <button className="tp-menu-it" onClick={pick(onStats)}><BarChart3 size={13} /> Statystyki</button>
+            <button className="tp-menu-it" onClick={pick(onCat)}><Settings size={13} /> Kategorie</button>
+            {user && (
+              <>
+                <div className="tp-menu-div" />
+                <div className="tp-menu-user">{user.name}</div>
+                <button className="tp-menu-it danger" onClick={pick(onLogout)}><LogOut size={13} /> Wyloguj</button>
+              </>
+            )}
+          </div>
+        )}
+      </div>
     </header>
   )
 }

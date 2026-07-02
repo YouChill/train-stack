@@ -18,6 +18,7 @@ import LogJournalModal from './components/LogJournalModal.jsx'
 import StatsModal  from './components/StatsModal.jsx'
 import ExerciseModal from './components/ExerciseModal.jsx'
 import WorkoutPlanModal from './components/WorkoutPlanModal.jsx'
+import Toasts, { toast } from './components/Toasts.jsx'
 
 function getTodayKey() {
   return ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'][new Date().getDay()]
@@ -189,7 +190,7 @@ export default function App() {
             }
           }
         }
-      } catch (e) { console.error('Workout save error:', e); alert('Błąd zapisu: ' + e.message) }
+      } catch (e) { console.error('Workout save error:', e); toast('Błąd zapisu: ' + e.message) }
     } else {
       const k = wk(w.day)
       setWkts((prev) => {
@@ -222,7 +223,7 @@ export default function App() {
         // 404 = już nie istnieje na serwerze, lokalne usunięcie jest poprawne
         if (e.status !== 404) {
           setWkts((prev) => ({ ...prev, [k]: before }))
-          alert('Nie udało się usunąć: ' + e.message)
+          toast('Nie udało się usunąć: ' + e.message)
         }
       }
     }
@@ -244,7 +245,7 @@ export default function App() {
         await api.workouts.update(id, toggled)
       } catch (e) {
         setWkts((prev) => ({ ...prev, [k]: before }))
-        alert('Nie udało się zapisać: ' + e.message)
+        toast('Nie udało się zapisać: ' + e.message)
       }
     }
   }
@@ -299,7 +300,7 @@ export default function App() {
           setWkts((prev) => ({ ...prev, [k]: (prev[k] || []).map((x) => (x.id === w.id ? updated : x)) }))
           try { await api.workouts.update(w.id, updated) } catch {}
         }
-      } catch (e) { alert('Błąd zapisu: ' + e.message) }
+      } catch (e) { toast('Błąd zapisu: ' + e.message) }
     }
     setTrackM(null)
     fetchLogCounts()
@@ -321,6 +322,7 @@ export default function App() {
   return (
     <>
       <style>{CSS}</style>
+      <Toasts />
 
       {resetToken && (
         <ResetPasswordModal
