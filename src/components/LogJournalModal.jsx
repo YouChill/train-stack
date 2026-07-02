@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { Clock, X } from 'lucide-react'
 import * as api from '../api.js'
 import ConfirmDelete from './ConfirmDelete.jsx'
+import { toast } from './Toasts.jsx'
 
 const FEELINGS = [
   { v: 1, icon: '😫', label: 'Fatalnie' },
@@ -32,7 +33,7 @@ export default function LogJournalModal({ workout, discs, onClose, onTrack }) {
       await api.logs.remove(logId)
       setLogs((prev) => prev.filter((l) => l.id !== logId))
     } catch (e) {
-      alert('Błąd: ' + e.message)
+      toast('Błąd: ' + e.message)
     }
   }
 
