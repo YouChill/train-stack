@@ -1,4 +1,5 @@
-import { Check, ClipboardList, Clock, Edit3, History, Repeat, Trash2 } from 'lucide-react'
+import { Check, ClipboardList, Clock, Dumbbell, Edit3, History, Moon, Repeat } from 'lucide-react'
+import ConfirmDelete from './ConfirmDelete.jsx'
 
 export default function WorkoutCard({ w, discs, logCount, onView, onEdit, onDelete, onToggle, onTrack, onViewLog }) {
   const d = discs.find((x) => x.id === w.discipline) || discs[0]
@@ -6,10 +7,10 @@ export default function WorkoutCard({ w, discs, logCount, onView, onEdit, onDele
   const exCnt = (w.exercises || []).length
   const logged = logCount > 0
 
-  if (w.rest) return <div className="tp-rest-card">🌙 Odpoczynek</div>
+  if (w.rest) return <div className="tp-rest-card"><Moon size={13} /> Odpoczynek</div>
 
   return (
-    <div className={`tp-card${w.done ? ' done' : ''}`} onClick={() => onView(w)}>
+    <div className={`tp-card${w.done ? ' done' : ''}`} style={{ '--dc': d.color }} onClick={() => onView(w)}>
       <div className="tp-card-top">
         <div className="tp-card-badge" style={{ background: d.color + '22', color: d.color }}>
           <span>{d.icon}</span>
@@ -35,7 +36,7 @@ export default function WorkoutCard({ w, discs, logCount, onView, onEdit, onDele
 
       {exCnt > 0 && (
         <div className="tp-ex-cnt">
-          💪 {exCnt} ćwiczeni{exCnt === 1 ? 'e' : exCnt < 5 ? 'a' : ''}
+          <Dumbbell size={12} /> {exCnt} ćwiczeni{exCnt === 1 ? 'e' : exCnt < 5 ? 'a' : ''}
         </div>
       )}
 
@@ -54,15 +55,13 @@ export default function WorkoutCard({ w, discs, logCount, onView, onEdit, onDele
         <button className="tp-ca tr" onClick={() => onTrack(w)} title="Zapisz wyniki">
           <ClipboardList size={14} />
         </button>
-        <button className="tp-ca dn" onClick={() => w.done ? onToggle(w.id) : onTrack(w)} title={w.done ? 'Odznacz' : 'Potwierdź wykonanie'}>
+        <button className="tp-ca dn" onClick={() => onToggle(w.id)} title={w.done ? 'Odznacz' : 'Oznacz jako wykonane'}>
           <Check size={14} strokeWidth={w.done ? 3 : 1.5} />
         </button>
-        <button className="tp-ca ed" onClick={() => onEdit(w)}>
+        <button className="tp-ca ed" onClick={() => onEdit(w)} title="Edytuj">
           <Edit3 size={14} />
         </button>
-        <button className="tp-ca dl" onClick={() => onDelete(w.id)}>
-          <Trash2 size={14} />
-        </button>
+        <ConfirmDelete onDelete={() => onDelete(w.id)} />
       </div>
     </div>
   )

@@ -24,7 +24,7 @@ export default function StatsModal({ discs, onClose }) {
       <div className="tp-modal tp-modal-w">
         <div className="tp-mi">
           <div className="tp-mh">
-            <div className="tp-mt">📊 Statystyki treningów</div>
+            <div className="tp-mt">Statystyki treningów</div>
             <button className="tp-x" onClick={onClose}><X size={16} /></button>
           </div>
 
@@ -107,7 +107,7 @@ export default function StatsModal({ discs, onClose }) {
 
           {!loading && tab === 'history' && (
             <div className="tp-log-list">
-              {logs.length === 0 && <div style={{ textAlign: 'center', color: '#404060', padding: 20 }}>Brak zapisanych treningów</div>}
+              {logs.length === 0 && <div style={{ textAlign: 'center', color: 'var(--ink-2)', padding: 20 }}>Brak zapisanych treningów</div>}
               {logs.map((log) => {
                 const di = disc(log.discipline)
                 return (

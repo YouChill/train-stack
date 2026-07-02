@@ -38,7 +38,7 @@ export default function WorkoutPlanModal({ workout, discs, onClose, onEdit, onTr
           {/* Exercise list */}
           {exercises.length > 0 && (
             <div className="tp-sec">
-              <div className="tp-sec-t">💪 Ćwiczenia</div>
+              <div className="tp-sec-t">Ćwiczenia</div>
               <div className="tp-plan-ex-list">
                 {exercises.map((ex, i) => (
                   <button
@@ -63,8 +63,8 @@ export default function WorkoutPlanModal({ workout, discs, onClose, onEdit, onTr
           {/* Notes */}
           {workout.notes && (
             <div className="tp-sec">
-              <div className="tp-sec-t">📝 Notatki</div>
-              <div style={{ fontSize: 13, color: '#5b6478', lineHeight: 1.5 }}>{workout.notes}</div>
+              <div className="tp-sec-t">Notatki</div>
+              <div style={{ fontSize: 13, color: 'var(--ink-2)', lineHeight: 1.5 }}>{workout.notes}</div>
             </div>
           )}
 

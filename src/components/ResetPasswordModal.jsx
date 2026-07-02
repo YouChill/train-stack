@@ -67,11 +67,7 @@ export default function ResetPasswordModal({ token, onDone, onCancel }) {
             </button>
 
             <div style={{ marginTop: 12, textAlign: 'center', fontSize: 12 }}>
-              <button
-                type="button"
-                onClick={onCancel}
-                style={{ background: 'none', border: 'none', color: '#60a5fa', cursor: 'pointer', padding: 0 }}
-              >
+              <button type="button" className="tp-auth-link" onClick={onCancel}>
                 Anuluj
               </button>
             </div>

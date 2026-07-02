@@ -1,4 +1,5 @@
-import { Clock, ClipboardList, Check, Edit3, Trash2 } from 'lucide-react'
+import { Clock, ClipboardList, Check, Edit3 } from 'lucide-react'
+import ConfirmDelete from './ConfirmDelete.jsx'
 
 export default function DayCard({ w, discs, logCounts, onView, onEdit, onDelete, onToggle, onTrack }) {
   if (w.rest) return null
@@ -61,15 +62,13 @@ export default function DayCard({ w, discs, logCounts, onView, onEdit, onDelete,
         <button className="tp-ca tr" title="Zapisz wyniki" onClick={onTrack}>
           <ClipboardList size={14} />
         </button>
-        <button className="tp-ca dn" title={w.done ? 'Odznacz' : 'Potwierdź'} onClick={onToggle}>
+        <button className="tp-ca dn" title={w.done ? 'Odznacz' : 'Oznacz jako wykonane'} onClick={onToggle}>
           <Check size={14} strokeWidth={w.done ? 3 : 1.5} />
         </button>
-        <button className="tp-ca ed" onClick={() => onEdit(w)}>
+        <button className="tp-ca ed" onClick={() => onEdit(w)} title="Edytuj">
           <Edit3 size={14} />
         </button>
-        <button className="tp-ca dl" onClick={onDelete}>
-          <Trash2 size={14} />
-        </button>
+        <ConfirmDelete onDelete={onDelete} />
       </div>
     </div>
   )
