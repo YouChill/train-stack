@@ -103,7 +103,7 @@ export default function AuthModal({ onAuth }) {
             )}
 
             {err && <div className="tp-err" style={{ marginBottom: 10 }}>{err}</div>}
-            {info && <div className="tp-info" style={{ marginBottom: 10, color: '#16a34a', fontSize: 13 }}>{info}</div>}
+            {info && <div className="tp-info" style={{ marginBottom: 10 }}>{info}</div>}
 
             <button className="tp-btn tp-bl" type="submit" disabled={loading} style={{ width: '100%', justifyContent: 'center' }}>
               {mode === 'login' ? <LogIn size={13} /> : mode === 'register' ? <UserPlus size={13} /> : <Mail size={13} />}
@@ -116,20 +116,12 @@ export default function AuthModal({ onAuth }) {
 
             <div style={{ marginTop: 12, textAlign: 'center', fontSize: 12 }}>
               {mode === 'login' && (
-                <button
-                  type="button"
-                  onClick={() => switchMode('forgot')}
-                  style={{ background: 'none', border: 'none', color: '#60a5fa', cursor: 'pointer', padding: 0 }}
-                >
+                <button type="button" className="tp-auth-link" onClick={() => switchMode('forgot')}>
                   Zapomniałem hasła
                 </button>
               )}
               {mode === 'forgot' && (
-                <button
-                  type="button"
-                  onClick={() => switchMode('login')}
-                  style={{ background: 'none', border: 'none', color: '#60a5fa', cursor: 'pointer', padding: 0 }}
-                >
+                <button type="button" className="tp-auth-link" onClick={() => switchMode('login')}>
                   ← Powrót do logowania
                 </button>
               )}

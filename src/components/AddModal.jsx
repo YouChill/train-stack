@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { Check, Clock, Minus, Plus, Repeat, X } from 'lucide-react'
+import { Check, Clock, Minus, Moon, Plus, Repeat, X } from 'lucide-react'
 import { DAYS, UNITS, LOAD_UNITS, RECURRENCE_OPTIONS } from '../constants.js'
 import * as api from '../api.js'
 
@@ -107,8 +107,9 @@ export default function AddModal({ targetDay, workout, prefillTime, discs, onSav
 
           <div className={`tp-rt${rest ? ' on' : ''}`} onClick={() => setRest((r) => !r)}>
             <div className={`tp-tg${rest ? ' on' : ''}`} />
-            <span style={{ fontSize: 13, color: rest ? '#7c50c8' : '#303050' }}>
-              {rest ? '🌙 Dzień odpoczynku' : 'Oznacz jako dzień odpoczynku'}
+            <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5, fontSize: 13, color: rest ? 'var(--violet)' : 'var(--ink-2)' }}>
+              {rest && <Moon size={13} />}
+              {rest ? 'Dzień odpoczynku' : 'Oznacz jako dzień odpoczynku'}
             </span>
           </div>
 
@@ -165,7 +166,7 @@ export default function AddModal({ targetDay, workout, prefillTime, discs, onSav
                 <div className="tp-sec">
                   <div className="tp-sec-t">Niestandardowe powtarzanie</div>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 8 }}>
-                    <span style={{ fontSize: 11, color: '#505070' }}>Co</span>
+                    <span style={{ fontSize: 11, color: 'var(--ink-2)' }}>Co</span>
                     <input
                       className="tp-sm"
                       type="number"
@@ -175,7 +176,7 @@ export default function AddModal({ targetDay, workout, prefillTime, discs, onSav
                       onChange={(e) => setRecInterval(parseInt(e.target.value) || 1)}
                       style={{ width: 50 }}
                     />
-                    <span style={{ fontSize: 11, color: '#505070' }}>tyg. w dni:</span>
+                    <span style={{ fontSize: 11, color: 'var(--ink-2)' }}>tyg. w dni:</span>
                   </div>
                   <div className="tp-rec-days">
                     {DAYS.map((d) => (
@@ -203,7 +204,7 @@ export default function AddModal({ targetDay, workout, prefillTime, discs, onSav
               )}
 
               <div className="tp-sec">
-                <div className="tp-sec-t">📊 Parametry</div>
+                <div className="tp-sec-t">Parametry</div>
                 {params.map((p, i) => (
                   <div key={i} className="tp-pr">
                     <input className="tp-sm" placeholder="Nazwa" value={p.key}
@@ -222,7 +223,7 @@ export default function AddModal({ targetDay, workout, prefillTime, discs, onSav
 
               {(disc?.hasEx || exs.length > 0) && (
                 <div className="tp-sec">
-                  <div className="tp-sec-t">💪 Ćwiczenia</div>
+                  <div className="tp-sec-t">Ćwiczenia</div>
                   {exs.length > 0 && (
                     <div className="tp-eh">
                       {['Ćwiczenie', 'Serie', 'Powt.', 'Obciąż.', 'Jednostka', ''].map((h, i) => (

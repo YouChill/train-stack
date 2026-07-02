@@ -1,5 +1,5 @@
-import { useState, useRef, useEffect, useMemo } from 'react'
-import { Plus } from 'lucide-react'
+import { Fragment, useState, useRef, useEffect, useMemo } from 'react'
+import { Moon, Plus } from 'lucide-react'
 import { isToday } from '../utils.js'
 import DayCard from './DayCard.jsx'
 
@@ -145,7 +145,7 @@ export default function DayView({ days, wkts, off, selDay, setSelDay, discs, log
           {totalVol > 0 && (
             <div className="tp-dv-summary-item">
               <div className="tp-dv-summary-val">
-                {Math.round(totalVol)}<span style={{ fontSize: 12, color: '#5b6478', marginLeft: 2 }}>kg</span>
+                {Math.round(totalVol)}<span style={{ fontSize: 12, color: 'var(--ink-2)', marginLeft: 2 }}>kg</span>
               </div>
               <div className="tp-dv-summary-lbl">Wolumen</div>
             </div>
@@ -172,16 +172,16 @@ export default function DayView({ days, wkts, off, selDay, setSelDay, discs, log
                 <div className="tp-dv-hour">—</div>
                 <div className="tp-dv-slot" style={{ minHeight: 'auto' }}>
                   {restItems.map((w) => (
-                    <div key={w.id} className="tp-dv-rest">🌙 Dzień odpoczynku — regeneracja &amp; rozciąganie</div>
+                    <div key={w.id} className="tp-dv-rest"><Moon size={14} /> Dzień odpoczynku — regeneracja &amp; rozciąganie</div>
                   ))}
                 </div>
               </>
             )}
 
             {unscheduled.map((w) => (
-              <>
-                <div key={`h-${w.id}`} className="tp-dv-hour">bez godz.</div>
-                <div key={`s-${w.id}`} className="tp-dv-slot" style={{ minHeight: 'auto' }}>
+              <Fragment key={w.id}>
+                <div className="tp-dv-hour">bez godz.</div>
+                <div className="tp-dv-slot" style={{ minHeight: 'auto' }}>
                   <DayCard
                     w={w}
                     discs={discs}
@@ -193,18 +193,17 @@ export default function DayView({ days, wkts, off, selDay, setSelDay, discs, log
                     onTrack={() => onTrack(w)}
                   />
                 </div>
-              </>
+              </Fragment>
             ))}
 
             {slots.map((slot) => {
               const isNowHour = dayIsToday && slot.h === nowH
               return (
-                <>
-                  <div key={`h-${slot.h}`} className={`tp-dv-hour${isNowHour ? ' now' : ''}`}>
+                <Fragment key={slot.h}>
+                  <div className={`tp-dv-hour${isNowHour ? ' now' : ''}`}>
                     {String(slot.h).padStart(2, '0')}:00
                   </div>
                   <div
-                    key={`s-${slot.h}`}
                     className={`tp-dv-slot${slot.items.length === 0 ? ' empty' : ''}`}
                     onClick={() => slot.items.length === 0 && onAdd(selDay, `${String(slot.h).padStart(2, '0')}:00`)}
                   >
@@ -221,7 +220,7 @@ export default function DayView({ days, wkts, off, selDay, setSelDay, discs, log
                       />
                     ))}
                   </div>
-                </>
+                </Fragment>
               )
             })}
 

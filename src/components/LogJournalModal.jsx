@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
-import { Clock, Trash2, X } from 'lucide-react'
+import { Clock, X } from 'lucide-react'
 import * as api from '../api.js'
+import ConfirmDelete from './ConfirmDelete.jsx'
 
 const FEELINGS = [
   { v: 1, icon: '😫', label: 'Fatalnie' },
@@ -40,7 +41,7 @@ export default function LogJournalModal({ workout, discs, onClose, onTrack }) {
       <div className="tp-modal tp-modal-w">
         <div className="tp-mi">
           <div className="tp-mh">
-            <div className="tp-mt">📒 Dziennik treningu</div>
+            <div className="tp-mt">Dziennik treningu</div>
             <button className="tp-x" onClick={onClose}><X size={16} /></button>
           </div>
 
@@ -54,7 +55,7 @@ export default function LogJournalModal({ workout, discs, onClose, onTrack }) {
           {/* Planned exercises summary */}
           {(workout.exercises || []).length > 0 && (
             <div className="tp-sec" style={{ marginBottom: 14 }}>
-              <div className="tp-sec-t">📋 Plan</div>
+              <div className="tp-sec-t">Plan</div>
               {workout.exercises.map((e, i) => (
                 <div key={i} className="tp-journal-plan-row">
                   <span className="tp-journal-ex-name">{e.name}</span>
@@ -67,7 +68,7 @@ export default function LogJournalModal({ workout, discs, onClose, onTrack }) {
           {loading && <div className="tp-loading"><div className="tp-spinner" /><p>Ładuję dziennik...</p></div>}
 
           {!loading && logs.length === 0 && (
-            <div style={{ textAlign: 'center', color: '#6b7280', padding: '30px 0' }}>
+            <div style={{ textAlign: 'center', color: 'var(--ink-3)', padding: '30px 0' }}>
               Brak wpisów w dzienniku
             </div>
           )}
@@ -86,9 +87,7 @@ export default function LogJournalModal({ workout, discs, onClose, onTrack }) {
                       </div>
                       <div className="tp-journal-meta">
                         {feel && <span title={feel.label}>{feel.icon}</span>}
-                        <button className="tp-ca dl" onClick={() => deleteLog(log.id)} title="Usuń wpis">
-                          <Trash2 size={11} />
-                        </button>
+                        <ConfirmDelete onDelete={() => deleteLog(log.id)} />
                       </div>
                     </div>
 

@@ -30,7 +30,7 @@ export default function TrackingModal({ workout, discs, onSave, onClose }) {
       <div className="tp-modal tp-modal-w">
         <div className="tp-mi">
           <div className="tp-mh">
-            <div className="tp-mt">📝 Zapisz trening</div>
+            <div className="tp-mt">Zapisz trening</div>
             <button className="tp-x" onClick={onClose}><X size={16} /></button>
           </div>
 
