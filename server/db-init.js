@@ -47,6 +47,13 @@ CREATE TABLE IF NOT EXISTS password_resets (
   used_at     TIMESTAMPTZ
 );
 CREATE INDEX IF NOT EXISTS idx_password_resets_user ON password_resets(user_id);
+
+-- RLS bez polic zamyka dostęp anon/authenticated przez PostgREST Supabase;
+-- aplikacja łączy się rolą-właścicielem tabel, więc jej to nie ogranicza.
+ALTER TABLE users ENABLE ROW LEVEL SECURITY;
+ALTER TABLE disciplines ENABLE ROW LEVEL SECURITY;
+ALTER TABLE workouts ENABLE ROW LEVEL SECURITY;
+ALTER TABLE password_resets ENABLE ROW LEVEL SECURITY;
 `
 
 try {
