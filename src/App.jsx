@@ -171,6 +171,8 @@ export default function App() {
 
   // ── CRUD ──────────────────────────────────────────────────────────────────
   const upsert = async (w) => {
+    // Nowa seria dostaje wspólny series_id, żeby dało się ją później usunąć w całości
+    if (w.recurrence && !w.id && !w.series_id) w = { ...w, series_id: uid() }
     if (user) {
       try {
         if (w.id) {
@@ -226,6 +228,42 @@ export default function App() {
           toast('Nie udało się usunąć: ' + e.message)
         }
       }
+    }
+  }
+
+  // Usuwa wskazane wystąpienie oraz wszystkie kolejne z tej samej serii.
+  // Starsze wpisy (sprzed series_id) dopasowujemy po regule, tytule i dyscyplinie.
+  const delSeries = async (day, id) => {
+    const target = (wkts[wk(day)] || []).find((x) => x.id === id)
+    if (!target) return
+    const inSeries = (x) => {
+      if (x.id === id) return true
+      if (target.series_id) return x.series_id === target.series_id
+      if (!x.recurrence || !target.recurrence) return false
+      return JSON.stringify(x.recurrence) === JSON.stringify(target.recurrence) &&
+        (x.title || '') === (target.title || '') && x.discipline === target.discipline
+    }
+    const snapshot = wkts
+    setWkts((prev) => {
+      const next = {}
+      for (const [key, list] of Object.entries(prev)) {
+        const keyOff = parseInt(key.split('|')[0], 10)
+        next[key] = keyOff >= off ? (list || []).filter((x) => !inSeries(x)) : list
+      }
+      return next
+    })
+    if (user) {
+      try {
+        const r = await api.workouts.removeSeries(id)
+        toast(`Usunięto serię (${r.deleted} treningów)`)
+      } catch (e) {
+        if (e.status !== 404) {
+          setWkts(snapshot)
+          toast('Nie udało się usunąć serii: ' + e.message)
+        }
+      }
+    } else {
+      toast('Usunięto serię')
     }
   }
 
@@ -370,6 +408,7 @@ export default function App() {
             onView={(w) => setPlanM(w)}
             onEdit={(w) => setAddM({ day: w.day, workout: w })}
             onDelete={del}
+            onDeleteSeries={delSeries}
             onToggle={toggle}
             onTrack={(w) => setTrackM(w)}
           />
@@ -386,6 +425,7 @@ export default function App() {
                 onView={(w)  => setPlanM(w)}
                 onEdit={(w)  => setAddM({ day: w.day, workout: w })}
                 onDelete={(id) => del(day.key, id)}
+                onDeleteSeries={(id) => delSeries(day.key, id)}
                 onToggle={(id) => toggle(day.key, id)}
                 onTrack={(w)  => setTrackM(w)}
                 onViewLog={(w) => setJournalM(w)}

@@ -13,6 +13,8 @@ function ensureSchema(pool) {
         SET week_start = (date_trunc('week', CURRENT_DATE))::date + (COALESCE(week_offset, 0) * 7)
         WHERE week_start IS NULL;
       CREATE INDEX IF NOT EXISTS idx_workouts_user_weekstart ON workouts(user_id, week_start);
+      ALTER TABLE workouts ADD COLUMN IF NOT EXISTS series_id TEXT;
+      CREATE INDEX IF NOT EXISTS idx_workouts_user_series ON workouts(user_id, series_id);
     `).catch((e) => { schemaReady = undefined; throw e })
   }
   return schemaReady
@@ -52,7 +54,43 @@ export default async function handler(req, res) {
     }
 
     // DELETE /api/workouts?id=X — delete workout
+    // DELETE /api/workouts?id=X&series=1 — usuwa to wystąpienie oraz wszystkie
+    // kolejne (week_start >= wskazanego) z tej samej serii. Wcześniejsze
+    // wystąpienia zostają, żeby nie kasować historii ani powiązanych logów.
     if (req.method === 'DELETE' && id) {
+      if (req.query.series) {
+        const { rows } = await pool.query(
+          'SELECT * FROM workouts WHERE id = $1 AND user_id = $2', [id, userId]
+        )
+        if (!rows.length) return res.status(404).json({ error: 'Nie znaleziono' })
+        const w = rows[0]
+
+        let result
+        if (w.series_id) {
+          result = await pool.query(
+            'DELETE FROM workouts WHERE user_id = $1 AND series_id = $2 AND week_start >= $3',
+            [userId, w.series_id, w.week_start]
+          )
+        } else if (w.recurrence) {
+          // Wpisy sprzed wprowadzenia series_id: kopie serii mają identyczną
+          // regułę, tytuł i dyscyplinę, więc dopasowujemy po tych atrybutach.
+          const days = w.recurrence.days
+            ? [...new Set([...w.recurrence.days, w.day])]
+            : [w.day]
+          result = await pool.query(
+            `DELETE FROM workouts
+             WHERE user_id = $1 AND series_id IS NULL AND recurrence = $2::jsonb
+               AND title = $3 AND discipline = $4 AND day = ANY($5) AND week_start >= $6`,
+            [userId, JSON.stringify(w.recurrence), w.title || '', w.discipline, days, w.week_start]
+          )
+        } else {
+          result = await pool.query(
+            'DELETE FROM workouts WHERE id = $1 AND user_id = $2', [id, userId]
+          )
+        }
+        return res.json({ ok: true, deleted: result.rowCount })
+      }
+
       const { rowCount } = await pool.query(
         'DELETE FROM workouts WHERE id = $1 AND user_id = $2', [id, userId]
       )
@@ -110,14 +148,14 @@ export default async function handler(req, res) {
       }
 
       // POST /api/workouts — create single workout
-      const { discipline, day, week_start, title, notes, params, exercises, rest, done, start_time, recurrence } = req.body
+      const { discipline, day, week_start, title, notes, params, exercises, rest, done, start_time, recurrence, series_id } = req.body
       const ws = week_start || (await currentMonday(pool))
       const { rows } = await pool.query(
-        `INSERT INTO workouts (user_id, discipline, day, week_start, title, notes, params, exercises, rest, done, start_time, recurrence)
-         VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12) RETURNING *`,
+        `INSERT INTO workouts (user_id, discipline, day, week_start, title, notes, params, exercises, rest, done, start_time, recurrence, series_id)
+         VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13) RETURNING *`,
         [userId, discipline, day, ws, title || '', notes || '',
          JSON.stringify(params || []), JSON.stringify(exercises || []), rest || false, done || false,
-         start_time || '', JSON.stringify(recurrence || null)]
+         start_time || '', JSON.stringify(recurrence || null), series_id || null]
       )
       return res.status(201).json(rows[0])
     }

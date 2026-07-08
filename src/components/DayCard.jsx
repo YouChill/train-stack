@@ -1,7 +1,7 @@
 import { Clock, ClipboardList, Check, Edit3 } from 'lucide-react'
 import ConfirmDelete from './ConfirmDelete.jsx'
 
-export default function DayCard({ w, discs, logCounts, onView, onEdit, onDelete, onToggle, onTrack }) {
+export default function DayCard({ w, discs, logCounts, onView, onEdit, onDelete, onDeleteSeries, onToggle, onTrack }) {
   if (w.rest) return null
 
   const disc = discs.find((x) => x.id === w.discipline) || discs[0]
@@ -68,7 +68,10 @@ export default function DayCard({ w, discs, logCounts, onView, onEdit, onDelete,
         <button className="tp-ca ed" onClick={() => onEdit(w)} title="Edytuj">
           <Edit3 size={14} />
         </button>
-        <ConfirmDelete onDelete={onDelete} />
+        <ConfirmDelete
+          onDelete={onDelete}
+          onDeleteSeries={w.recurrence && onDeleteSeries ? onDeleteSeries : undefined}
+        />
       </div>
     </div>
   )

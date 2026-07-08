@@ -18,7 +18,7 @@ function weekNum(date) {
   return Math.ceil((((d - yearStart) / 86400000) + 1) / 7)
 }
 
-export default function DayView({ days, wkts, off, selDay, setSelDay, discs, logCounts, onAdd, onView, onEdit, onDelete, onToggle, onTrack }) {
+export default function DayView({ days, wkts, off, selDay, setSelDay, discs, logCounts, onAdd, onView, onEdit, onDelete, onDeleteSeries, onToggle, onTrack }) {
   const bodyRef = useRef(null)
   const [compact, setCompact] = useState(false)
 
@@ -189,6 +189,7 @@ export default function DayView({ days, wkts, off, selDay, setSelDay, discs, log
                     onView={onView}
                     onEdit={onEdit}
                     onDelete={() => onDelete(w.day, w.id)}
+                    onDeleteSeries={() => onDeleteSeries(w.day, w.id)}
                     onToggle={() => onToggle(w.day, w.id)}
                     onTrack={() => onTrack(w)}
                   />
@@ -215,6 +216,7 @@ export default function DayView({ days, wkts, off, selDay, setSelDay, discs, log
                         logCounts={logCounts}
                         onEdit={() => onEdit(w)}
                         onDelete={() => onDelete(w.day, w.id)}
+                        onDeleteSeries={() => onDeleteSeries(w.day, w.id)}
                         onToggle={() => onToggle(w.day, w.id)}
                         onTrack={() => onTrack(w)}
                       />

@@ -36,6 +36,7 @@ export const workouts = {
   create:  (body)     => request('/api/workouts',        { method: 'POST', body: JSON.stringify(body) }),
   update:  (id, body) => request(`/api/workouts?id=${id}`, { method: 'PUT',  body: JSON.stringify(body) }),
   remove:  (id)       => request(`/api/workouts?id=${id}`, { method: 'DELETE' }),
+  removeSeries: (id)  => request(`/api/workouts?id=${id}&series=1`, { method: 'DELETE' }),
   import_: (body)     => request('/api/workouts?action=import', { method: 'POST', body: JSON.stringify(body) }),
 }
 

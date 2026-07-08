@@ -1,7 +1,7 @@
 import { Check, ClipboardList, Clock, Dumbbell, Edit3, History, Moon, Repeat } from 'lucide-react'
 import ConfirmDelete from './ConfirmDelete.jsx'
 
-export default function WorkoutCard({ w, discs, logCount, onView, onEdit, onDelete, onToggle, onTrack, onViewLog }) {
+export default function WorkoutCard({ w, discs, logCount, onView, onEdit, onDelete, onDeleteSeries, onToggle, onTrack, onViewLog }) {
   const d = discs.find((x) => x.id === w.discipline) || discs[0]
   const filled = (w.params || []).filter((p) => p.value)
   const exCnt = (w.exercises || []).length
@@ -61,7 +61,10 @@ export default function WorkoutCard({ w, discs, logCount, onView, onEdit, onDele
         <button className="tp-ca ed" onClick={() => onEdit(w)} title="Edytuj">
           <Edit3 size={14} />
         </button>
-        <ConfirmDelete onDelete={() => onDelete(w.id)} />
+        <ConfirmDelete
+          onDelete={() => onDelete(w.id)}
+          onDeleteSeries={w.recurrence && onDeleteSeries ? () => onDeleteSeries(w.id) : undefined}
+        />
       </div>
     </div>
   )
