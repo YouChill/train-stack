@@ -1,6 +1,7 @@
-import pool from './db.js'
-
-const SQL = `
+-- Bazowy schemat (users, disciplines, workouts, password_resets) — dotąd
+-- istniał tylko w server/db-init.js; jako migracja pozwala runnerowi
+-- (scripts/migrate.js) postawić świeżą bazę od zera. Na istniejącej bazie
+-- wszystko jest no-opem dzięki IF NOT EXISTS.
 CREATE TABLE IF NOT EXISTS users (
   id          SERIAL PRIMARY KEY,
   email       VARCHAR(255) UNIQUE NOT NULL,
@@ -37,7 +38,6 @@ CREATE TABLE IF NOT EXISTS workouts (
 );
 
 CREATE INDEX IF NOT EXISTS idx_workouts_user_week ON workouts(user_id, week_offset);
-CREATE INDEX IF NOT EXISTS idx_workouts_user_weekstart ON workouts(user_id, week_start);
 CREATE INDEX IF NOT EXISTS idx_disciplines_user ON disciplines(user_id);
 
 CREATE TABLE IF NOT EXISTS password_resets (
@@ -47,20 +47,3 @@ CREATE TABLE IF NOT EXISTS password_resets (
   used_at     TIMESTAMPTZ
 );
 CREATE INDEX IF NOT EXISTS idx_password_resets_user ON password_resets(user_id);
-
--- RLS bez polic zamyka dostęp anon/authenticated przez PostgREST Supabase;
--- aplikacja łączy się rolą-właścicielem tabel, więc jej to nie ogranicza.
-ALTER TABLE users ENABLE ROW LEVEL SECURITY;
-ALTER TABLE disciplines ENABLE ROW LEVEL SECURITY;
-ALTER TABLE workouts ENABLE ROW LEVEL SECURITY;
-ALTER TABLE password_resets ENABLE ROW LEVEL SECURITY;
-`
-
-try {
-  await pool.query(SQL)
-  console.log('Database initialized successfully')
-} catch (e) {
-  console.error('DB init error:', e.message)
-} finally {
-  await pool.end()
-}
