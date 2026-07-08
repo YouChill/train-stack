@@ -4,6 +4,9 @@ import jwt from 'jsonwebtoken'
 // wersję w bazie, przez co wszystkie wcześniej wydane tokeny stają się
 // nieważne — bez tego skradziony JWT żyłby do 30 dni mimo zmiany hasła.
 export function signToken(id, tokenVersion = 0) {
+  if (!process.env.JWT_SECRET) {
+    throw new Error('JWT_SECRET nie jest ustawiony w tym środowisku (sprawdź Environment Variables w Vercel dla Production/Preview)')
+  }
   return jwt.sign({ id, tv: tokenVersion }, process.env.JWT_SECRET, { expiresIn: '30d' })
 }
 
