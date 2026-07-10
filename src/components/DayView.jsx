@@ -1,4 +1,4 @@
-import { Fragment, useState, useRef, useEffect, useMemo } from 'react'
+import { Fragment, useRef, useEffect, useMemo } from 'react'
 import { Moon, Plus } from 'lucide-react'
 import { isToday } from '../utils.js'
 import DayCard from './DayCard.jsx'
@@ -19,16 +19,7 @@ function weekNum(date) {
 }
 
 export default function DayView({ days, wkts, off, selDay, setSelDay, discs, logCounts, pageCompact, onAdd, onView, onEdit, onDelete, onDeleteSeries, onToggle, onTrack }) {
-  const bodyRef = useRef(null)
   const nowSlotRef = useRef(null)
-  const [compact, setCompact] = useState(false)
-  // Desktop scrolls the inner timeline (compact), mobile scrolls the page (pageCompact)
-  const isCompact = compact || pageCompact
-
-  const onBodyScroll = (e) => {
-    const t = e.target.scrollTop
-    setCompact((prev) => (prev ? t > 10 : t > 24))
-  }
 
   const day = days.find((d) => d.key === selDay) || days[0]
   const dayIsToday = isToday(day.date)
@@ -73,15 +64,17 @@ export default function DayView({ days, wkts, off, selDay, setSelDay, discs, log
   const showNow = dayIsToday && nowH >= 6 && nowH <= 22
 
   useEffect(() => {
-    if (showNow && bodyRef.current && nowSlotRef.current) {
-      bodyRef.current.scrollTop = Math.max(0, nowSlotRef.current.offsetTop - 120)
+    if (showNow && nowSlotRef.current) {
+      // strona przewija się w oknie; ~200px zapasu na sticky nagłówek i pasek dni
+      const y = nowSlotRef.current.getBoundingClientRect().top + window.scrollY - 200
+      window.scrollTo(0, Math.max(0, y))
     }
   }, [selDay, showNow])
 
   return (
     <div className="tp-dayview">
       {/* Day strip */}
-      <div className={`tp-dv-strip${isCompact ? ' compact' : ''}`}>
+      <div className={`tp-dv-strip${pageCompact ? ' compact' : ''}`}>
         {days.map((d) => {
           const dList = wkts[wk(d.key)] || []
           const dPlanned = dList.filter((w) => !w.rest)
@@ -121,7 +114,7 @@ export default function DayView({ days, wkts, off, selDay, setSelDay, discs, log
       </div>
 
       {/* Day header */}
-      <div className={`tp-dv-hdr${isCompact ? ' compact' : ''}`}>
+      <div className={`tp-dv-hdr${pageCompact ? ' compact' : ''}`}>
         <div className="tp-dv-date-block">
           <div className={`tp-dv-dnum${dayIsToday ? '' : ' not-today'}`}>{day.date.getDate()}</div>
           <div className="tp-dv-dmeta">
@@ -156,7 +149,7 @@ export default function DayView({ days, wkts, off, selDay, setSelDay, discs, log
       </div>
 
       {/* Timeline body */}
-      <div className="tp-dv-body" ref={bodyRef} onScroll={onBodyScroll} style={{ position: 'relative' }}>
+      <div className="tp-dv-body">
         {list.length === 0 && (
           <div className="tp-dv-empty-day">
             <h3>Nic zaplanowane na ten dzień</h3>
