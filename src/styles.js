@@ -54,7 +54,9 @@ button:focus-visible,a:focus-visible,[tabindex]:focus-visible{outline:2px solid 
 .tp-logo em{color:#5b6478;font-style:normal;}
 .tp-div{width:1px;height:22px;background:var(--chrome-border);flex-shrink:0;}
 .tp-wnav{display:flex;align-items:center;gap:6px;}
-.tp-wrange{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:16px;color:#9ca3af;min-width:134px;text-align:center;letter-spacing:0.3px;}
+.tp-wrange{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:16px;color:#9ca3af;min-width:134px;text-align:center;letter-spacing:0.3px;white-space:nowrap;}
+.tp-wrange.day{min-width:180px;}
+.tp-actions{display:flex;align-items:center;gap:10px;}
 .tp-prog{display:flex;align-items:center;gap:7px;}
 .tp-prog-bar{width:66px;height:3px;background:var(--chrome-border);border-radius:2px;overflow:hidden;}
 .tp-prog-fill{height:100%;background:var(--lime);transition:width .4s;}
@@ -433,9 +435,17 @@ input[type="time"],input[type="date"]{color-scheme:light;}
 /* Mobile */
 @media(max-width:768px){
 .tp{overflow:auto;}
-.tp-hdr{height:auto;flex-wrap:wrap;padding:10px 12px;gap:6px;}
-.tp-logo{font-size:17px;}
-.tp-wrange{font-size:13px;min-width:auto;}
+/* Dwa uporządkowane wiersze: logo · nawigacja tygodnia · Dziś / przełącznik · postęp · akcje.
+   .tp-spacer pełni rolę łamania wiersza, a space-between rozkłada każdy wiersz niezależnie. */
+.tp-hdr{height:auto;padding:10px 12px;flex-wrap:wrap;justify-content:space-between;row-gap:9px;column-gap:6px;}
+.tp-logo{order:0;font-size:17px;}
+.tp-wnav{order:1;min-width:0;}
+.tp-btn-today{order:2;}
+.tp-spacer{order:3;flex:none;flex-basis:100%;height:0;}
+.tp-view-sw{order:4;}
+.tp-prog{order:5;}
+.tp-actions{order:6;gap:6px;}
+.tp-wrange,.tp-wrange.day{font-size:13px;min-width:0;overflow:hidden;text-overflow:ellipsis;}
 .tp-div{display:none;}
 .tp-prog-bar{width:50px;}
 .tp-hbtn{padding:5px 8px;font-size:11px;}
@@ -480,11 +490,12 @@ input[type="time"],input[type="date"]{color-scheme:light;}
 .tp-card{flex:1;min-width:calc(50% - 3px);}
 .tp-rest-card{flex:1;min-width:calc(50% - 3px);}
 
-.tp-hdr{gap:5px;}
+.tp-hdr{row-gap:8px;column-gap:5px;}
 .tp-logo{font-size:15px;}
-.tp-wrange{font-size:12px;}
+.tp-wrange,.tp-wrange.day{font-size:12px;}
 .tp-hbtn{padding:4px 7px;font-size:10px;}
-.tp-spacer{display:none;}
+.tp-view-sw button{padding:4px 8px;font-size:10px;}
+.tp-actions{gap:5px;}
 
 .tp-card-title{font-size:13px;}
 .tp-card-badge{font-size:9px;}

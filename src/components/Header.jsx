@@ -41,11 +41,11 @@ export default function Header({
 
       <div className="tp-wnav">
         <button className="tp-hbtn-ic" onClick={onPrev}><ChevronLeft size={14} /></button>
-        <div className="tp-wrange" style={{ minWidth: view === 'day' ? 180 : 134 }}>{wrange}</div>
+        <div className={`tp-wrange${view === 'day' ? ' day' : ''}`}>{wrange}</div>
         <button className="tp-hbtn-ic" onClick={onNext}><ChevronRight size={14} /></button>
       </div>
 
-      <button className="tp-hbtn" onClick={onToday} style={{ fontSize: 11 }}>Dziś</button>
+      <button className="tp-hbtn tp-btn-today" onClick={onToday} style={{ fontSize: 11 }}>Dziś</button>
 
       <div className="tp-view-sw">
         <button className={view === 'week' ? 'active' : ''} onClick={() => onSetView('week')}>
@@ -67,27 +67,29 @@ export default function Header({
 
       <div className="tp-spacer" />
 
-      <button className="tp-hbtn tp-btn-ai" onClick={onAI}><Sparkles size={12} /> <span className="tp-hbtn-text">Generuj AI</span></button>
-      <button className="tp-hbtn tp-btn-lime" onClick={onAdd}><Plus size={12} /> <span className="tp-hbtn-text">Dodaj</span></button>
+      <div className="tp-actions">
+        <button className="tp-hbtn tp-btn-ai" onClick={onAI}><Sparkles size={12} /> <span className="tp-hbtn-text">Generuj AI</span></button>
+        <button className="tp-hbtn tp-btn-lime" onClick={onAdd}><Plus size={12} /> <span className="tp-hbtn-text">Dodaj</span></button>
 
-      <div className="tp-menu-wrap" ref={menuRef}>
-        <button className="tp-hbtn-ic" onClick={() => setMenu((m) => !m)} title="Więcej opcji">
-          <MoreVertical size={14} />
-        </button>
-        {menu && (
-          <div className="tp-menu">
-            <button className="tp-menu-it" onClick={pick(onImport)}><Upload size={13} /> Import JSON</button>
-            <button className="tp-menu-it" onClick={pick(onStats)}><BarChart3 size={13} /> Statystyki</button>
-            <button className="tp-menu-it" onClick={pick(onCat)}><Settings size={13} /> Kategorie</button>
-            {user && (
-              <>
-                <div className="tp-menu-div" />
-                <div className="tp-menu-user">{user.name}</div>
-                <button className="tp-menu-it danger" onClick={pick(onLogout)}><LogOut size={13} /> Wyloguj</button>
-              </>
-            )}
-          </div>
-        )}
+        <div className="tp-menu-wrap" ref={menuRef}>
+          <button className="tp-hbtn-ic" onClick={() => setMenu((m) => !m)} title="Więcej opcji">
+            <MoreVertical size={14} />
+          </button>
+          {menu && (
+            <div className="tp-menu">
+              <button className="tp-menu-it" onClick={pick(onImport)}><Upload size={13} /> Import JSON</button>
+              <button className="tp-menu-it" onClick={pick(onStats)}><BarChart3 size={13} /> Statystyki</button>
+              <button className="tp-menu-it" onClick={pick(onCat)}><Settings size={13} /> Kategorie</button>
+              {user && (
+                <>
+                  <div className="tp-menu-div" />
+                  <div className="tp-menu-user">{user.name}</div>
+                  <button className="tp-menu-it danger" onClick={pick(onLogout)}><LogOut size={13} /> Wyloguj</button>
+                </>
+              )}
+            </div>
+          )}
+        </div>
       </div>
     </header>
   )
