@@ -44,3 +44,11 @@ export const fmtDate = (d) =>
 
 export const isToday = (d) =>
   new Date().toDateString() === d.toDateString()
+
+// Polska odmiana rzeczownika po liczebniku, np. plural(5, 'ćwiczenie', 'ćwiczenia', 'ćwiczeń')
+export const plural = (n, one, few, many) => {
+  if (n === 1) return one
+  const d = n % 10
+  const h = n % 100
+  return d >= 2 && d <= 4 && (h < 12 || h > 14) ? few : many
+}

@@ -1,5 +1,6 @@
 import { Check, ClipboardList, Clock, Dumbbell, Edit3, History, Moon, Repeat } from 'lucide-react'
 import ConfirmDelete from './ConfirmDelete.jsx'
+import { plural } from '../utils.js'
 
 export default function WorkoutCard({ w, discs, logCount, onView, onEdit, onDelete, onDeleteSeries, onToggle, onTrack, onViewLog }) {
   const d = discs.find((x) => x.id === w.discipline) || discs[0]
@@ -17,7 +18,7 @@ export default function WorkoutCard({ w, discs, logCount, onView, onEdit, onDele
           <span>{d.name}</span>
         </div>
         <div className="tp-card-meta">
-          {logged && <span className="tp-card-logged" title={`${logCount} wpisów`}>✓ {logCount}</span>}
+          {logged && <span className="tp-card-logged" title={`${logCount} ${plural(logCount, 'wpis', 'wpisy', 'wpisów')}`}>✓ {logCount}</span>}
           {w.recurrence && <Repeat size={9} className="tp-card-rec-ic" />}
           {w.start_time && (
             <span className="tp-card-time"><Clock size={9} /> {w.start_time}</span>
@@ -36,7 +37,7 @@ export default function WorkoutCard({ w, discs, logCount, onView, onEdit, onDele
 
       {exCnt > 0 && (
         <div className="tp-ex-cnt">
-          <Dumbbell size={12} /> {exCnt} ćwiczeni{exCnt === 1 ? 'e' : exCnt < 5 ? 'a' : ''}
+          <Dumbbell size={12} /> {exCnt} {plural(exCnt, 'ćwiczenie', 'ćwiczenia', 'ćwiczeń')}
         </div>
       )}
 
