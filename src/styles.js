@@ -434,10 +434,17 @@ input[type="time"],input[type="date"]{color-scheme:light;}
 
 /* Mobile */
 @media(max-width:768px){
-.tp{overflow:auto;}
+/* Strona przewija się w oknie; overflow:visible (nie auto) — inaczej .tp staje się
+   scroll-containerem, który nigdy nie przewija, i position:sticky wewnątrz przestaje działać. */
+.tp{overflow:visible;}
 /* Dwa uporządkowane wiersze: logo · nawigacja tygodnia · Dziś / przełącznik · postęp · akcje.
    .tp-spacer pełni rolę łamania wiersza, a space-between rozkłada każdy wiersz niezależnie. */
-.tp-hdr{height:auto;padding:10px 12px;flex-wrap:wrap;justify-content:space-between;row-gap:9px;column-gap:6px;}
+.tp-hdr{height:auto;padding:10px 12px;flex-wrap:wrap;justify-content:space-between;row-gap:9px;column-gap:6px;position:sticky;top:0;background:rgba(26,34,51,.92);-webkit-backdrop-filter:blur(12px) saturate(1.4);backdrop-filter:blur(12px) saturate(1.4);transition:padding .2s ease,box-shadow .2s ease;}
+/* Po przewinięciu: jeden smukły wiersz — logo · nawigacja dnia/tygodnia · Dodaj + menu */
+.tp-hdr.compact{padding:7px 12px;box-shadow:0 6px 20px rgba(15,23,42,.3);}
+.tp-hdr.compact .tp-logo{font-size:14px;}
+.tp-hdr.compact .tp-spacer,.tp-hdr.compact .tp-view-sw,.tp-hdr.compact .tp-prog,.tp-hdr.compact .tp-btn-today,.tp-hdr.compact .tp-btn-ai{display:none;}
+.tp-hdr.compact .tp-wnav{min-width:0;flex-shrink:1;}
 .tp-logo{order:0;font-size:17px;}
 .tp-wnav{order:1;min-width:0;}
 .tp-btn-today{order:2;}
@@ -516,7 +523,11 @@ input[type="time"],input[type="date"]{color-scheme:light;}
 }
 /* Mobile - day view */
 @media(max-width:768px){
-.tp-dv-strip{padding:8px 12px;gap:4px;}
+/* overflow:visible, żeby pasek dni mógł się przykleić do viewportu (sticky nie działa
+   pod przodkiem z overflow:hidden) */
+.tp-dayview{overflow:visible;}
+.tp-dv-strip{padding:8px 12px;gap:4px;position:sticky;top:var(--hdr-h,58px);z-index:40;}
+.tp-dv-strip.compact{padding:4px 12px;}
 .tp-dv-strip-d{min-width:52px;padding:6px 8px;}
 .tp-dv-hdr{padding:12px 16px 10px;}
 .tp-dv-dnum{font-size:38px;}

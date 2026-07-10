@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
 import CSS from './styles.js'
 import { DAYS, DEFAULT_DISCIPLINES } from './constants.js'
 import { uid, getWeekDates, weekStartStr } from './utils.js'
@@ -44,6 +44,32 @@ export default function App() {
 
   const [off,     setOff]     = useState(0)
   const [view,    setView]    = useState('day')
+
+  // Mobile: the page itself scrolls — condense the sticky header past a threshold
+  const hdrRef = useRef(null)
+  const [pageCompact, setPageCompact] = useState(false)
+
+  useEffect(() => {
+    const onScroll = () => {
+      const t = window.scrollY
+      setPageCompact((prev) => (prev ? t > 16 : t > 48))
+    }
+    window.addEventListener('scroll', onScroll, { passive: true })
+    return () => window.removeEventListener('scroll', onScroll)
+  }, [])
+
+  // Keep --hdr-h in sync with the real header height so the day strip can stick right below it
+  useEffect(() => {
+    const hdr = hdrRef.current
+    if (!hdr || typeof ResizeObserver === 'undefined') return
+    const ro = new ResizeObserver(() => {
+      document.documentElement.style.setProperty('--hdr-h', `${hdr.getBoundingClientRect().height}px`)
+    })
+    // border-box: padding animuje się przy zwijaniu, content-box by tego nie wykrył
+    ro.observe(hdr, { box: 'border-box' })
+    return () => ro.disconnect()
+  }, [])
+
   const [selDay,  setSelDay]  = useState(getTodayKey)
   const [wkts,  setWkts]  = useState({})
   const [discs, setDiscs] = useState(DEFAULT_DISCIPLINES)
@@ -378,6 +404,8 @@ export default function App() {
 
       <div className="tp">
         <Header
+          hdrRef={hdrRef}
+          compact={pageCompact}
           days={days}
           stats={stats}
           user={user}
@@ -399,6 +427,7 @@ export default function App() {
           <DayView
             days={days}
             wkts={wkts}
+            pageCompact={pageCompact}
             off={off}
             selDay={selDay}
             setSelDay={setSelDay}
