@@ -18,10 +18,12 @@ function weekNum(date) {
   return Math.ceil((((d - yearStart) / 86400000) + 1) / 7)
 }
 
-export default function DayView({ days, wkts, off, selDay, setSelDay, discs, logCounts, onAdd, onView, onEdit, onDelete, onDeleteSeries, onToggle, onTrack }) {
+export default function DayView({ days, wkts, off, selDay, setSelDay, discs, logCounts, pageCompact, onAdd, onView, onEdit, onDelete, onDeleteSeries, onToggle, onTrack }) {
   const bodyRef = useRef(null)
   const nowSlotRef = useRef(null)
   const [compact, setCompact] = useState(false)
+  // Desktop scrolls the inner timeline (compact), mobile scrolls the page (pageCompact)
+  const isCompact = compact || pageCompact
 
   const onBodyScroll = (e) => {
     const t = e.target.scrollTop
@@ -79,7 +81,7 @@ export default function DayView({ days, wkts, off, selDay, setSelDay, discs, log
   return (
     <div className="tp-dayview">
       {/* Day strip */}
-      <div className={`tp-dv-strip${compact ? ' compact' : ''}`}>
+      <div className={`tp-dv-strip${isCompact ? ' compact' : ''}`}>
         {days.map((d) => {
           const dList = wkts[wk(d.key)] || []
           const dPlanned = dList.filter((w) => !w.rest)
@@ -119,7 +121,7 @@ export default function DayView({ days, wkts, off, selDay, setSelDay, discs, log
       </div>
 
       {/* Day header */}
-      <div className={`tp-dv-hdr${compact ? ' compact' : ''}`}>
+      <div className={`tp-dv-hdr${isCompact ? ' compact' : ''}`}>
         <div className="tp-dv-date-block">
           <div className={`tp-dv-dnum${dayIsToday ? '' : ' not-today'}`}>{day.date.getDate()}</div>
           <div className="tp-dv-dmeta">

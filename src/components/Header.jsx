@@ -14,7 +14,7 @@ function fmtDayLabel(day) {
 }
 
 export default function Header({
-  days, stats, user, view, selDay,
+  hdrRef, compact, days, stats, user, view, selDay,
   onPrev, onNext, onToday, onAdd, onImport, onAI, onCat, onStats, onLogout,
   onSetView,
 }) {
@@ -35,7 +35,7 @@ export default function Header({
   const pick = (fn) => () => { setMenu(false); fn() }
 
   return (
-    <header className="tp-hdr">
+    <header ref={hdrRef} className={`tp-hdr${compact ? ' compact' : ''}`}>
       <div className="tp-logo">TRAIN<em>stack</em></div>
       <div className="tp-div" />
 
