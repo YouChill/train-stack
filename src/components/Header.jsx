@@ -45,25 +45,30 @@ export default function Header({
         <button className="tp-hbtn-ic" onClick={onNext}><ChevronRight size={14} /></button>
       </div>
 
-      <button className="tp-hbtn tp-btn-today" onClick={onToday} style={{ fontSize: 11 }}>Dziś</button>
+      {/* Na mobile: drugi, zwijany wiersz; na desktopie display:contents — bez wpływu na layout */}
+      <div className="tp-hdr-r2">
+        <div className="tp-hdr-r2-in">
+          <button className="tp-hbtn tp-btn-today" onClick={onToday} style={{ fontSize: 11 }}>Dziś</button>
 
-      <div className="tp-view-sw">
-        <button className={view === 'week' ? 'active' : ''} onClick={() => onSetView('week')}>
-          <Grid size={11} /> Tydzień
-        </button>
-        <button className={view === 'day' ? 'active' : ''} onClick={() => onSetView('day')}>
-          <Layers size={11} /> Dzień
-        </button>
-      </div>
-
-      {stats.total > 0 && (
-        <div className="tp-prog">
-          <div className="tp-prog-bar">
-            <div className="tp-prog-fill" style={{ width: `${pct}%` }} />
+          <div className="tp-view-sw">
+            <button className={view === 'week' ? 'active' : ''} onClick={() => onSetView('week')}>
+              <Grid size={11} /> Tydzień
+            </button>
+            <button className={view === 'day' ? 'active' : ''} onClick={() => onSetView('day')}>
+              <Layers size={11} /> Dzień
+            </button>
           </div>
-          <span className="tp-prog-txt">{stats.done}/{stats.total}</span>
+
+          {stats.total > 0 && (
+            <div className="tp-prog">
+              <div className="tp-prog-bar">
+                <div className="tp-prog-fill" style={{ width: `${pct}%` }} />
+              </div>
+              <span className="tp-prog-txt">{stats.done}/{stats.total}</span>
+            </div>
+          )}
         </div>
-      )}
+      </div>
 
       <div className="tp-spacer" />
 

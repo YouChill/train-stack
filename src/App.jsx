@@ -59,16 +59,35 @@ export default function App() {
   }, [])
 
   // Keep --hdr-h in sync with the real header height so the day strip can stick right below it
-  useEffect(() => {
+  const syncHdrH = () => {
     const hdr = hdrRef.current
-    if (!hdr || typeof ResizeObserver === 'undefined') return
-    const ro = new ResizeObserver(() => {
-      document.documentElement.style.setProperty('--hdr-h', `${hdr.getBoundingClientRect().height}px`)
-    })
-    // border-box: padding animuje się przy zwijaniu, content-box by tego nie wykrył
-    ro.observe(hdr, { box: 'border-box' })
-    return () => ro.disconnect()
+    if (hdr) document.documentElement.style.setProperty('--hdr-h', `${hdr.getBoundingClientRect().height}px`)
+  }
+
+  useEffect(() => {
+    syncHdrH()
+    const hdr = hdrRef.current
+    let ro
+    if (hdr && typeof ResizeObserver !== 'undefined') {
+      ro = new ResizeObserver(syncHdrH)
+      ro.observe(hdr)
+    }
+    window.addEventListener('resize', syncHdrH)
+    return () => { ro?.disconnect(); window.removeEventListener('resize', syncHdrH) }
   }, [])
+
+  // ResizeObserver (content-box) nie widzi animowanego paddingu — przez czas
+  // trwania animacji zwijania śledź wysokość co klatkę
+  useEffect(() => {
+    let raf
+    const t0 = performance.now()
+    const tick = (t) => {
+      syncHdrH()
+      if (t - t0 < 500) raf = requestAnimationFrame(tick)
+    }
+    raf = requestAnimationFrame(tick)
+    return () => cancelAnimationFrame(raf)
+  }, [pageCompact])
 
   const [selDay,  setSelDay]  = useState(getTodayKey)
   const [wkts,  setWkts]  = useState({})

@@ -54,6 +54,8 @@ button:focus-visible,a:focus-visible,[tabindex]:focus-visible{outline:2px solid 
 .tp-logo em{color:#5b6478;font-style:normal;}
 .tp-div{width:1px;height:22px;background:var(--chrome-border);flex-shrink:0;}
 .tp-wnav{display:flex;align-items:center;gap:6px;}
+/* Na desktopie wrapper drugiego wiersza jest przezroczysty dla layoutu */
+.tp-hdr-r2,.tp-hdr-r2-in{display:contents;}
 .tp-wrange{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:16px;color:#9ca3af;min-width:134px;text-align:center;letter-spacing:0.3px;white-space:nowrap;}
 .tp-wrange.day{min-width:180px;}
 .tp-actions{display:flex;align-items:center;gap:10px;}
@@ -437,21 +439,18 @@ input[type="time"],input[type="date"]{color-scheme:light;}
 /* Strona przewija się w oknie; overflow:visible (nie auto) — inaczej .tp staje się
    scroll-containerem, który nigdy nie przewija, i position:sticky wewnątrz przestaje działać. */
 .tp{overflow:visible;}
-/* Dwa uporządkowane wiersze: logo · nawigacja tygodnia · Dziś / przełącznik · postęp · akcje.
-   .tp-spacer pełni rolę łamania wiersza, a space-between rozkłada każdy wiersz niezależnie. */
-.tp-hdr{height:auto;padding:10px 12px;flex-wrap:wrap;justify-content:space-between;row-gap:9px;column-gap:6px;position:sticky;top:0;background:rgba(26,34,51,.92);-webkit-backdrop-filter:blur(12px) saturate(1.4);backdrop-filter:blur(12px) saturate(1.4);transition:padding .2s ease,box-shadow .2s ease;}
-/* Po przewinięciu: jeden smukły wiersz — logo · nawigacja dnia/tygodnia · Dodaj + menu */
+/* Dwa wiersze: logo · nawigacja · akcje / [zwijany] Dziś · przełącznik · postęp.
+   Drugi wiersz (.tp-hdr-r2) zwija się płynnie przez grid-template-rows 1fr→0fr. */
+.tp-hdr{height:auto;padding:10px 12px;flex-wrap:wrap;justify-content:space-between;row-gap:0;column-gap:6px;position:sticky;top:0;background:rgba(26,34,51,.92);-webkit-backdrop-filter:blur(12px) saturate(1.4);backdrop-filter:blur(12px) saturate(1.4);transition:padding .3s cubic-bezier(.33,0,.2,1),box-shadow .3s ease;}
 .tp-hdr.compact{padding:7px 12px;box-shadow:0 6px 20px rgba(15,23,42,.3);}
 .tp-hdr.compact .tp-logo{font-size:14px;}
-.tp-hdr.compact .tp-spacer,.tp-hdr.compact .tp-view-sw,.tp-hdr.compact .tp-prog,.tp-hdr.compact .tp-btn-today,.tp-hdr.compact .tp-btn-ai{display:none;}
-.tp-hdr.compact .tp-wnav{min-width:0;flex-shrink:1;}
-.tp-logo{order:0;font-size:17px;}
+.tp-hdr.compact .tp-hdr-r2{grid-template-rows:0fr;opacity:0;padding-top:0;pointer-events:none;}
+.tp-logo{order:0;font-size:17px;transition:font-size .3s cubic-bezier(.33,0,.2,1);}
 .tp-wnav{order:1;min-width:0;}
-.tp-btn-today{order:2;}
-.tp-spacer{order:3;flex:none;flex-basis:100%;height:0;}
-.tp-view-sw{order:4;}
-.tp-prog{order:5;}
-.tp-actions{order:6;gap:6px;}
+.tp-actions{order:2;gap:6px;}
+.tp-spacer{display:none;}
+.tp-hdr-r2{order:3;flex:none;flex-basis:100%;display:grid;grid-template-rows:1fr;opacity:1;padding-top:9px;transition:grid-template-rows .3s cubic-bezier(.33,0,.2,1),opacity .22s ease,padding-top .3s cubic-bezier(.33,0,.2,1);}
+.tp-hdr-r2-in{display:flex;align-items:center;justify-content:space-between;gap:6px;min-height:0;overflow:hidden;}
 .tp-wrange,.tp-wrange.day{font-size:13px;min-width:0;overflow:hidden;text-overflow:ellipsis;}
 .tp-div{display:none;}
 .tp-prog-bar{width:50px;}
@@ -497,7 +496,9 @@ input[type="time"],input[type="date"]{color-scheme:light;}
 .tp-card{flex:1;min-width:calc(50% - 3px);}
 .tp-rest-card{flex:1;min-width:calc(50% - 3px);}
 
-.tp-hdr{row-gap:8px;column-gap:5px;}
+.tp-hdr{column-gap:5px;}
+.tp-hdr-r2{padding-top:8px;}
+.tp-hdr.compact .tp-hdr-r2{padding-top:0;}
 .tp-logo{font-size:15px;}
 .tp-wrange,.tp-wrange.day{font-size:12px;}
 .tp-hbtn{padding:4px 7px;font-size:10px;}
