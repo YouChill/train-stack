@@ -1,6 +1,21 @@
 import { useState } from 'react'
 import { Upload, X } from 'lucide-react'
-import { EXAMPLE_JSON } from '../constants.js'
+import { DAYS, EXAMPLE_JSON } from '../constants.js'
+
+const DAY_KEYS = DAYS.map((d) => d.key)
+
+// Klucze tygodnia muszą być dokładnie mon..sun — inaczej wpis nigdzie się nie
+// wyświetli (a serwer odrzuci insert). Kilka treningów tego samego dnia to
+// kilka elementów jednej tablicy, nie osobne klucze typu "thu_stretch".
+function checkDays(week) {
+  const bad = Object.keys(week || {}).filter((k) => !DAY_KEYS.includes(k))
+  if (bad.length) {
+    throw new Error(
+      `nieprawidłowy dzień "${bad[0]}" — dozwolone klucze to: ${DAY_KEYS.join(', ')}. ` +
+      'Kilka treningów tego samego dnia umieść jako elementy jednej tablicy.'
+    )
+  }
+}
 
 export default function ImportModal({ onImport, onClose }) {
   const [text, setText] = useState('')
@@ -10,6 +25,8 @@ export default function ImportModal({ onImport, onClose }) {
     try {
       const p = JSON.parse(text.trim())
       if (!p.week && !p.weeks) throw new Error('Brak klucza "week" lub "weeks"')
+      if (p.week) checkDays(p.week)
+      if (p.weeks) Object.values(p.weeks).forEach(checkDays)
       onImport(p)
     } catch (e) {
       setErr('Błąd: ' + e.message)
