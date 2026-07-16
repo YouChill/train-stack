@@ -5,6 +5,10 @@ import auth from '../middleware/auth.js'
 const router = Router()
 router.use(auth)
 
+// Kolumna workouts.day to VARCHAR(3) — dłuższy klucz (np. "thu_stretch")
+// wywalał cały import; walidujemy z góry i zwracamy czytelny błąd.
+const VALID_DAYS = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun']
+
 async function currentMonday() {
   const { rows } = await pool.query("SELECT (date_trunc('week', CURRENT_DATE))::date AS d")
   return rows[0].d
@@ -76,6 +80,12 @@ router.delete('/:id', async (req, res) => {
 router.post('/import', async (req, res) => {
   const { week_start, week } = req.body
   if (!week) return res.status(400).json({ error: 'Brak klucza "week"' })
+  const badDay = Object.keys(week).find((d) => !VALID_DAYS.includes(d))
+  if (badDay) {
+    return res.status(400).json({
+      error: `Nieprawidłowy dzień "${badDay}" — dozwolone: ${VALID_DAYS.join(', ')}`,
+    })
+  }
 
   try {
     const ws = week_start || (await currentMonday())

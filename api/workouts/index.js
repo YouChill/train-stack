@@ -1,6 +1,10 @@
 import getPool from '../_db.js'
 import { verifyUser, cors } from '../_auth.js'
 
+// Kolumna workouts.day to VARCHAR(3) — dłuższy klucz (np. "thu_stretch")
+// wywalał cały import; walidujemy z góry i zwracamy czytelny błąd.
+const VALID_DAYS = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun']
+
 // Ensure the absolute-week anchor column exists and is backfilled. Workouts used
 // to be stored with a relative `week_offset` which drifts as calendar weeks pass;
 // `week_start` (the Monday of the week) pins them to real dates instead.
@@ -113,6 +117,12 @@ export default async function handler(req, res) {
       if (action === 'import') {
         const { week_start, week } = req.body
         if (!week) return res.status(400).json({ error: 'Brak klucza "week"' })
+        const badDay = Object.keys(week).find((d) => !VALID_DAYS.includes(d))
+        if (badDay) {
+          return res.status(400).json({
+            error: `Nieprawidłowy dzień "${badDay}" — dozwolone: ${VALID_DAYS.join(', ')}`,
+          })
+        }
         const ws = week_start || (await currentMonday(pool))
 
         // Wymiana całego tygodnia w jednej transakcji — błąd przy dowolnym

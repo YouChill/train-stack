@@ -349,7 +349,12 @@ export default function App() {
           DAYS.forEach((d) => { next[`${off}|${d.key}`] = grouped[`${off}|${d.key}`] || [] })
           return next
         })
-      } catch { /* fallback */ }
+      } catch (e) {
+        // Zostaw modal otwarty, żeby użytkownik mógł poprawić JSON — cichy
+        // powrót wyglądał jak "import nic nie zrobił".
+        toast('Błąd importu: ' + e.message)
+        return
+      }
     } else {
       const ns = { ...wkts }
       const weeks = parsed.weeks || { [off]: parsed.week }
