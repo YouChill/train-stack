@@ -147,9 +147,25 @@ Samopoczucie: 💪 (4.1/5) · vs poprzedni okres: sesje +20%, tonaż +8%
 
 ## 7. Etapy wdrożenia
 
-1. **MVP**: endpoint + modal + kopiowanie tekstu (pkt 2–4). Samowystarczalny PR.
-2. **Eksport plikowy**: pobieranie .md (ew. CSV sesji dla arkuszy).
-3. **Opcjonalnie później** (fundamenty już są w repo):
+1. **MVP**: endpoint + modal + kopiowanie tekstu (pkt 2–4). ✅ (PR #40)
+2. **Eksport plikowy**: pobieranie .md + CSV sesji (średniki i BOM pod
+   polski Excel). ✅ — po uwagach z mobile eksport zebrany w jeden przycisk
+   „Eksport" z menu: Udostępnij (natywny arkusz przez `navigator.share`,
+   tylko gdy dostępny), Kopiuj tekst, Pobierz .md, Pobierz CSV.
+3. **Raport pojedynczego ćwiczenia** (backlog, zgłoszone z użycia):
+   na dole modala raportu sekcja z wyborem ćwiczenia i wykresem
+   powtórzeń + ciężaru w czasie.
+   - wybór: `<select>`/datalist zasilany istniejącym
+     `GET /api/exercise-logs?names=1` (nazwy już znormalizowane
+     i posortowane po ostatnim użyciu);
+   - dane: rozszerzenie `/api/report` o `?exercise=nazwa` zwracające
+     per dzień okresu `max obciążenie [kg]`, `sumę powtórzeń` i liczbę
+     serii (agregacja jak w CTE `flat`/`per_day` z topExercises);
+   - wykres: słupki = powtórzenia, linia/punkty = max kg (dwie osie,
+     styl `tp-stat-weeks`, bez bibliotek — spójnie z resztą);
+   - stan wyboru nie resetuje się przy zmianie okresu; ćwiczenie trafia
+     też do eksportu tekstowego jako osobna sekcja.
+4. **Opcjonalnie później** (fundamenty już są w repo):
    - podsumowanie narracyjne AI — `api/ai.js` już ma auth+rate-limit,
      wystarczy `action=summary` z payloadem raportu;
    - cotygodniowy raport e-mailem — `api/_mail.js` (nodemailer) już wysyła
