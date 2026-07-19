@@ -64,11 +64,14 @@ export const DEFAULT_DISCIPLINES = [
   },
 ]
 
+// Przykład pokazuje każdy wariant wpisu: trening z parametrami, dzień z dwoma
+// treningami (elementy jednej tablicy), ćwiczenia siłowe i dzień odpoczynku.
 export const EXAMPLE_JSON = `{
   "week": {
     "mon": [{
       "discipline": "run",
       "title": "Poranny bieg",
+      "start_time": "07:30",
       "params": [
         {"key":"Dystans","value":"10","unit":"km"},
         {"key":"Czas","value":"55","unit":"min"}
@@ -79,24 +82,25 @@ export const EXAMPLE_JSON = `{
     "wed": [{
       "discipline": "gym",
       "title": "Siłownia górna",
-      "params": [],
+      "params": [
+        {"key":"Czas treningu","value":"60","unit":"min"}
+      ],
       "exercises": [
-        {"name":"Bench Press","sets":"4","reps":"8","load":"80","loadUnit":"kg"}
+        {"name":"Bench Press","sets":"4","reps":"8","load":"80","loadUnit":"kg"},
+        {"name":"Podciąganie","sets":"3","reps":"10","load":"8","loadUnit":"RPE"}
       ],
       "notes": ""
-    }],
-    "fri": [{
+    }, {
       "discipline": "stretch",
       "title": "Rozciąganie wieczorne",
+      "start_time": "20:00",
       "params": [
         {"key":"Czas trwania","value":"20","unit":"min"}
       ],
       "exercises": [
-        {"name":"Skłon do przodu","sets":"2","reps":"1","load":"30","loadUnit":"sek"},
-        {"name":"Pozycja gołębia","sets":"2","reps":"1","load":"45","loadUnit":"sek"},
-        {"name":"Rozciąganie klatki w drzwiach","sets":"3","reps":"1","load":"30","loadUnit":"sek"}
+        {"name":"Pozycja gołębia","sets":"2","reps":"1","load":"45","loadUnit":"sek"}
       ],
-      "notes": "Każde ćwiczenie na obie strony"
+      "notes": "Drugi trening tego samego dnia — kolejny element tablicy"
     }],
     "sun": [{
       "rest": true,
