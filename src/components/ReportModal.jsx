@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react'
-import { Copy, X } from 'lucide-react'
+import { Copy, Download, FileSpreadsheet, X } from 'lucide-react'
 import * as api from '../api.js'
 import { toast } from './Toasts.jsx'
-import { buildReportText } from '../report-text.js'
+import { buildReportText, buildSessionsCsv } from '../report-text.js'
 import { plural } from '../utils.js'
 
 const FEELINGS = ['', '😫', '😓', '😐', '💪', '🔥']
@@ -64,6 +64,21 @@ export default function ReportModal({ discs, onClose }) {
       toast('Nie udało się skopiować do schowka')
     }
   }
+
+  const download = (name, text, mime) => {
+    const url = URL.createObjectURL(new Blob([text], { type: mime }))
+    const a = document.createElement('a')
+    a.href = url
+    a.download = name
+    a.click()
+    URL.revokeObjectURL(url)
+  }
+
+  const downloadMd = () =>
+    download(`raport-${range.from}_${range.to}.md`, buildReportText(data, discs), 'text/markdown;charset=utf-8')
+
+  const downloadCsv = () =>
+    download(`treningi-${range.from}_${range.to}.csv`, buildSessionsCsv(data, discs), 'text/csv;charset=utf-8')
 
   const empty = data && data.kpi.sessions === 0
 
@@ -241,9 +256,13 @@ export default function ReportModal({ discs, onClose }) {
             </>
           )}
 
-          <div className="tp-mf">
+          <div className="tp-mf" style={{ flexWrap: 'wrap' }}>
             {!loading && data && !empty && (
-              <button className="tp-btn tp-bp" onClick={copy}><Copy size={12} /> Kopiuj tekst</button>
+              <>
+                <button className="tp-btn tp-bg" onClick={downloadCsv}><FileSpreadsheet size={12} /> CSV</button>
+                <button className="tp-btn tp-bg" onClick={downloadMd}><Download size={12} /> Pobierz .md</button>
+                <button className="tp-btn tp-bp" onClick={copy}><Copy size={12} /> Kopiuj tekst</button>
+              </>
             )}
             <button className="tp-btn tp-bg" onClick={onClose}>Zamknij</button>
           </div>

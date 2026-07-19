@@ -136,6 +136,19 @@ export default async function handler(req, res) {
     [userId, from, to]
   )
 
+  // Płaska lista sesji pod eksport CSV (arkusze kalkulacyjne)
+  const sessionsListQ = pool.query(
+    `SELECT ${DAY}::text AS date,
+            to_char(wl.logged_at AT TIME ZONE $2, 'HH24:MI') AS time,
+            w.title, w.discipline, wl.feeling, wl.note
+     FROM workout_logs wl
+     JOIN workouts w ON w.id = wl.workout_id
+     WHERE wl.user_id = $1 AND ${DAY} BETWEEN $3 AND $4
+     ORDER BY wl.logged_at ASC
+     LIMIT 1000`,
+    [userId, tz, from, to]
+  )
+
   const notesQ = pool.query(
     `SELECT ${DAY}::text AS date, w.title, w.discipline, wl.feeling, wl.note
      FROM workout_logs wl
@@ -148,10 +161,10 @@ export default async function handler(req, res) {
   )
 
   try {
-    const [cur, prev, vol, prevVol, plan, byDisc, perDay, topEx, notes] = await Promise.all([
+    const [cur, prev, vol, prevVol, plan, byDisc, perDay, topEx, notes, sessionsList] = await Promise.all([
       sessionsQ(from, to), sessionsQ(prevFrom, prevTo),
       volumeQ(from, to), volumeQ(prevFrom, prevTo),
-      plannedQ, byDiscQ, perDayQ, topExQ, notesQ,
+      plannedQ, byDiscQ, perDayQ, topExQ, notesQ, sessionsListQ,
     ])
 
     const c = cur.rows[0]
@@ -178,6 +191,7 @@ export default async function handler(req, res) {
       perDay: perDay.rows,
       topExercises: topEx.rows,
       notes: notes.rows,
+      sessions: sessionsList.rows,
     })
   } catch (e) {
     console.error('Report error:', e)
