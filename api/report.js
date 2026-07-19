@@ -48,6 +48,60 @@ export default async function handler(req, res) {
   if (days < 1) return res.status(400).json({ error: 'from nie może być późniejsze niż to' })
   if (days > MAX_DAYS) return res.status(400).json({ error: `Maksymalny okres to ${MAX_DAYS} dni` })
 
+  // Tryb szczegółowy: ?exercise=nazwa → tylko dane jednego ćwiczenia
+  // (osobne pobranie przy wyborze z listy, bez przeliczania całego raportu)
+  if (req.query.exercise !== undefined) {
+    const norm = String(req.query.exercise).trim().replace(/\s+/g, ' ').toLowerCase()
+    if (!norm) return res.status(400).json({ error: 'Podaj exercise' })
+    try {
+      const [canonical, perDay] = await Promise.all([
+        pool.query(
+          `SELECT exercise_name FROM exercise_logs
+           WHERE user_id = $1 AND ${NORM('exercise_name')} = $2
+           ORDER BY logged_date ASC, id ASC LIMIT 1`,
+          [userId, norm]
+        ),
+        pool.query(
+          `WITH flat AS (
+             SELECT el.logged_date,
+                    CASE WHEN COALESCE(s->>'load_unit', 'kg') = 'kg' AND s->>'actual_load' ~ ${NUM_RE}
+                         THEN ${NUM(`s->>'actual_load'`)} END AS load,
+                    CASE WHEN s->>'actual_reps' ~ ${NUM_RE}
+                         THEN ${NUM(`s->>'actual_reps'`)} END AS reps
+             FROM exercise_logs el
+             CROSS JOIN LATERAL jsonb_array_elements(el.sets) s
+             WHERE el.user_id = $1 AND ${NORM('el.exercise_name')} = $2
+               AND el.logged_date BETWEEN $3 AND $4
+           )
+           SELECT logged_date::text AS date,
+                  COUNT(*)::int AS sets,
+                  COALESCE(SUM(reps), 0)::float AS reps,
+                  MAX(load)::float AS max_load,
+                  COALESCE(SUM(reps * load), 0)::float AS volume_kg
+           FROM flat
+           GROUP BY logged_date
+           ORDER BY logged_date`,
+          [userId, norm, from, to]
+        ),
+      ])
+      const rows = perDay.rows
+      return res.json({
+        period: { from, to, days },
+        exercise: {
+          name: canonical.rows[0]?.exercise_name || req.query.exercise,
+          perDay: rows,
+          days: rows.length,
+          bestLoad: rows.reduce((m, r) => Math.max(m, r.max_load || 0), 0) || null,
+          totalReps: rows.reduce((s, r) => s + r.reps, 0),
+          volumeKg: rows.reduce((s, r) => s + r.volume_kg, 0),
+        },
+      })
+    } catch (e) {
+      console.error('Report exercise error:', e)
+      return res.status(500).json({ error: 'Błąd serwera' })
+    }
+  }
+
   // Okno porównawcze: ten sam rozmiar, bezpośrednio przed okresem raportu
   const prevTo = shiftDate(from, -1)
   const prevFrom = shiftDate(from, -days)
