@@ -66,6 +66,11 @@ export const stats = {
   get: () => request('/api/stats'),
 }
 
+export const report = {
+  get: ({ from, to, tz }) =>
+    request(`/api/report?from=${from}&to=${to}&tz=${encodeURIComponent(tz || '')}`),
+}
+
 export const ai = {
   generate: (body) => request('/api/ai', { method: 'POST', body: JSON.stringify(body) }),
 }

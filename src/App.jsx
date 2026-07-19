@@ -16,6 +16,7 @@ import ResetPasswordModal from './components/ResetPasswordModal.jsx'
 import TrackingModal from './components/TrackingModal.jsx'
 import LogJournalModal from './components/LogJournalModal.jsx'
 import StatsModal  from './components/StatsModal.jsx'
+import ReportModal from './components/ReportModal.jsx'
 import ExerciseModal from './components/ExerciseModal.jsx'
 import WorkoutPlanModal from './components/WorkoutPlanModal.jsx'
 import Toasts, { toast } from './components/Toasts.jsx'
@@ -109,6 +110,7 @@ export default function App() {
   const [journalM, setJournalM] = useState(null)  // workout to view journal
   const [logCounts, setLogCounts] = useState({})  // { workoutId: count }
   const [statsM, setStatsM] = useState(false)
+  const [reportM, setReportM] = useState(false)
   const [exerciseM, setExerciseM] = useState(null) // { workout, exercise }
   const [planM, setPlanM] = useState(null) // workout whose plan to show
 
@@ -443,6 +445,7 @@ export default function App() {
           onAI={()    => setAiM(true)}
           onCat={()   => setCatM(true)}
           onStats={() => setStatsM(true)}
+          onReport={() => setReportM(true)}
           onLogout={logout}
           onSetView={setView}
         />
@@ -515,6 +518,7 @@ export default function App() {
       )}
       {exerciseM && <ExerciseModal workout={exerciseM.workout} exercise={exerciseM.exercise} discs={discs} onClose={() => setExerciseM(null)} />}
       {statsM && <StatsModal discs={discs} onClose={() => setStatsM(false)} />}
+      {reportM && <ReportModal discs={discs} onClose={() => setReportM(false)} />}
     </>
   )
 }
