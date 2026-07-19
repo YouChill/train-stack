@@ -240,6 +240,25 @@ button:focus-visible,a:focus-visible,[tabindex]:focus-visible{outline:2px solid 
 
 /* Import */
 .tp-imp-eg{background:var(--surface);border:1px solid var(--border-soft);border-radius:8px;padding:10px;font-size:11px;color:var(--ink-2);font-family:monospace;white-space:pre-wrap;margin-bottom:11px;max-height:130px;overflow-y:auto;}
+/* Mini-dokumentacja formatu w modalu importu */
+.tp-imp-doc{background:var(--surface);border:1px solid var(--border-soft);border-radius:8px;padding:4px 10px 6px;font-size:12px;color:var(--ink-2);margin-bottom:11px;max-height:320px;overflow-y:auto;}
+.tp-imp-intro{padding:7px 0 8px;line-height:1.45;}
+.tp-imp-doc code{font-family:monospace;font-size:11px;background:var(--card);border:1px solid var(--border-soft);border-radius:4px;padding:0 4px;color:var(--ink);}
+.tp-imp-sec{border-top:1px solid var(--border-soft);}
+.tp-imp-sec summary{cursor:pointer;padding:7px 0;font-weight:600;font-size:12px;color:var(--ink);list-style:none;display:flex;align-items:center;gap:6px;user-select:none;}
+.tp-imp-sec summary::-webkit-details-marker{display:none;}
+.tp-imp-sec summary::before{content:'▸';color:var(--ink-4);font-size:10px;transition:transform .15s ease;}
+.tp-imp-sec[open] summary::before{transform:rotate(90deg);}
+.tp-imp-sec-body{padding:0 0 9px;}
+.tp-imp-sec-body .tp-imp-eg{margin-bottom:0;}
+.tp-imp-fld{display:flex;align-items:baseline;gap:7px;padding:3px 0;line-height:1.4;}
+.tp-imp-fld code{flex-shrink:0;}
+.tp-imp-req{flex-shrink:0;color:var(--danger);font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.3px;}
+.tp-imp-sub{font-size:10px;font-weight:600;color:var(--ink-3);margin:7px 0 3px;text-transform:uppercase;letter-spacing:.4px;}
+.tp-imp-sub:first-child{margin-top:0;}
+.tp-imp-chips{display:flex;flex-wrap:wrap;gap:4px;}
+.tp-imp-chip{display:inline-flex;align-items:center;gap:4px;background:var(--card);border:1px solid var(--border-soft);border-radius:5px;padding:2px 6px;font-size:11px;color:var(--ink-2);}
+.tp-imp-chip code{border:none;background:none;padding:0;}
 .tp-err{font-size:12px;color:var(--danger);margin-top:5px;}
 .tp-info{font-size:13px;color:var(--success);}
 
