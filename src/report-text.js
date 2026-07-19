@@ -21,7 +21,9 @@ const deltaTxt = (cur, prevVal) => {
   return `${pct >= 0 ? '+' : ''}${pct}%`
 }
 
-export function buildReportText(report, discs) {
+// `exercise` (opcjonalne) to sekcja szczegółowa wybranego ćwiczenia
+// z trybu ?exercise= endpointu raportu.
+export function buildReportText(report, discs, exercise) {
   const disc = (id) => discs.find((d) => d.id === id) || { icon: '🏅', name: id }
   const { period, kpi, prev, byDiscipline, topExercises, notes } = report
   const L = []
@@ -76,6 +78,22 @@ export function buildReportText(report, discs) {
       const di = disc(n.discipline)
       const title = n.title || di.name
       L.push(`- ${fmtDate(n.date).slice(0, 5)} „${title}": ${n.note.trim().replace(/\s+/g, ' ')}`)
+    }
+  }
+
+  if (exercise?.perDay?.length) {
+    L.push('')
+    L.push(`## Ćwiczenie: ${exercise.name}`)
+    const sum = [`${exercise.days} ${plural(exercise.days, 'dzień', 'dni', 'dni')}`]
+    if (exercise.bestLoad) sum.push(`best ${fmtNum(exercise.bestLoad)} kg`)
+    if (exercise.totalReps > 0) sum.push(`${fmtNum(exercise.totalReps)} powt.`)
+    if (exercise.volumeKg > 0) sum.push(`tonaż ${fmtNum(exercise.volumeKg)} kg`)
+    L.push(sum.join(' · '))
+    for (const d of exercise.perDay) {
+      const bits = [`${d.sets} ${plural(d.sets, 'seria', 'serie', 'serii')}`]
+      if (d.reps > 0) bits.push(`${fmtNum(d.reps)} powt.`)
+      if (d.max_load) bits.push(`max ${fmtNum(d.max_load)} kg`)
+      L.push(`- ${fmtDate(d.date).slice(0, 5)}: ${bits.join(', ')}`)
     }
   }
 

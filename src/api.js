@@ -67,8 +67,9 @@ export const stats = {
 }
 
 export const report = {
-  get: ({ from, to, tz }) =>
-    request(`/api/report?from=${from}&to=${to}&tz=${encodeURIComponent(tz || '')}`),
+  get: ({ from, to, tz, exercise }) =>
+    request(`/api/report?from=${from}&to=${to}&tz=${encodeURIComponent(tz || '')}${
+      exercise ? `&exercise=${encodeURIComponent(exercise)}` : ''}`),
 }
 
 export const ai = {

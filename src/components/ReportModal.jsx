@@ -41,6 +41,27 @@ export default function ReportModal({ discs, onClose }) {
   const [expMenu, setExpMenu] = useState(false)
   const expRef = useRef(null)
 
+  // Raport pojedynczego ćwiczenia: lista nazw + dane wybranego w okresie
+  const [exNames, setExNames] = useState([])
+  const [selEx, setSelEx] = useState('')
+  const [exData, setExData] = useState(null)
+  const [exLoading, setExLoading] = useState(false)
+
+  useEffect(() => {
+    api.exerciseLogs.names().then(setExNames).catch(() => {})
+  }, [])
+
+  useEffect(() => {
+    if (!selEx) { setExData(null); return }
+    if (!range.from || !range.to || range.from > range.to) return
+    setExLoading(true)
+    const tz = Intl.DateTimeFormat().resolvedOptions().timeZone
+    api.report.get({ ...range, tz, exercise: selEx })
+      .then((r) => setExData(r.exercise))
+      .catch((e) => { toast('Błąd raportu ćwiczenia: ' + e.message); setExData(null) })
+      .finally(() => setExLoading(false))
+  }, [range, selEx])
+
   useEffect(() => {
     if (!expMenu) return
     const close = (e) => { if (!expRef.current?.contains(e.target)) setExpMenu(false) }
@@ -67,7 +88,7 @@ export default function ReportModal({ discs, onClose }) {
 
   const copy = async () => {
     try {
-      await navigator.clipboard.writeText(buildReportText(data, discs))
+      await navigator.clipboard.writeText(buildReportText(data, discs, exData))
       toast('Raport skopiowany do schowka', 'success')
     } catch {
       toast('Nie udało się skopiować do schowka')
@@ -84,7 +105,7 @@ export default function ReportModal({ discs, onClose }) {
   }
 
   const downloadMd = () =>
-    download(`raport-${range.from}_${range.to}.md`, buildReportText(data, discs), 'text/markdown;charset=utf-8')
+    download(`raport-${range.from}_${range.to}.md`, buildReportText(data, discs, exData), 'text/markdown;charset=utf-8')
 
   const downloadCsv = () =>
     download(`treningi-${range.from}_${range.to}.csv`, buildSessionsCsv(data, discs), 'text/csv;charset=utf-8')
@@ -92,7 +113,7 @@ export default function ReportModal({ discs, onClose }) {
   // Na telefonie najnaturalniejszy jest systemowy arkusz udostępniania
   const share = async () => {
     try {
-      await navigator.share({ title: 'Raport treningowy', text: buildReportText(data, discs) })
+      await navigator.share({ title: 'Raport treningowy', text: buildReportText(data, discs, exData) })
     } catch { /* anulowane przez użytkownika */ }
   }
 
@@ -132,6 +153,55 @@ export default function ReportModal({ discs, onClose }) {
           </div>
         ))}
       </div>
+    )
+  }
+
+  // Wykres wybranego ćwiczenia: słupek = suma powtórzeń dnia, punkt = max kg.
+  // Oś pokazuje tylko dni z seriami (progres siłowy, nie frekwencja).
+  const exChart = () => {
+    const rows = exData.perDay
+    const maxReps = Math.max(1, ...rows.map((r) => r.reps))
+    const maxLoad = Math.max(0, ...rows.map((r) => r.max_load || 0))
+    const withMonth = rows.length <= 8
+    const labelEvery = rows.length > 16 ? Math.ceil(rows.length / 6) : 1
+    return (
+      <>
+        <div className="tp-exch-sum">
+          {exData.bestLoad != null && <span>best <b>{fmtNum(exData.bestLoad)} kg</b></span>}
+          {exData.totalReps > 0 && <span><b>{fmtNum(exData.totalReps)}</b> powt.</span>}
+          {exData.volumeKg > 0 && <span>tonaż <b>{fmtNum(exData.volumeKg)} kg</b></span>}
+          <span>{exData.days} {plural(exData.days, 'dzień', 'dni', 'dni')}</span>
+        </div>
+        <div className="tp-exch-legend">
+          <span><i className="tp-exch-leg-bar" /> powtórzenia</span>
+          {maxLoad > 0 && <span><i className="tp-exch-leg-dot" /> max kg</span>}
+        </div>
+        <div className={`tp-stat-weeks${rows.length > 16 ? ' dense' : ''}`} style={{ height: 'auto' }}>
+          {rows.map((r, i) => {
+            const [yy, mm, dd] = r.date.split('-').map(Number)
+            const dt = new Date(yy, mm - 1, dd)
+            return (
+              <div key={r.date} className="tp-stat-week">
+                <div className="tp-exch-track">
+                  <div className="tp-exch-bar" style={{ height: `${(r.reps / maxReps) * 100}%` }} />
+                  {r.max_load > 0 && (
+                    <div className="tp-exch-dot" title={`${fmtNum(r.max_load)} kg`}
+                      style={{ bottom: `${(r.max_load / maxLoad) * 100}%` }} />
+                  )}
+                </div>
+                <div className="tp-stat-week-cnt">{r.reps ? fmtNum(r.reps) : ''}</div>
+                <div className="tp-stat-week-lbl">
+                  {i % labelEvery === 0
+                    ? (withMonth
+                        ? dt.toLocaleDateString('pl', { day: 'numeric', month: 'short' })
+                        : dt.getDate())
+                    : ''}
+                </div>
+              </div>
+            )
+          })}
+        </div>
+      </>
     )
   }
 
@@ -277,6 +347,25 @@ export default function ReportModal({ discs, onClose }) {
                 </div>
               )}
             </>
+          )}
+
+          {/* Poza blokiem !empty — serie ćwiczeń mogą istnieć bez zapisanych sesji */}
+          {!loading && data && exNames.length > 0 && (
+            <div className="tp-sec">
+              <div className="tp-sec-t">Raport ćwiczenia</div>
+              <select className="tp-sel" value={selEx} style={{ marginBottom: 10 }}
+                onChange={(e) => setSelEx(e.target.value)}>
+                <option value="">— wybierz ćwiczenie —</option>
+                {exNames.map((n) => <option key={n} value={n}>{n}</option>)}
+              </select>
+              {exLoading && <div className="tp-loading" style={{ padding: '14px 0' }}><div className="tp-spinner" /></div>}
+              {!exLoading && exData && exData.perDay.length === 0 && (
+                <div style={{ textAlign: 'center', color: 'var(--ink-2)', padding: 12, fontSize: 12 }}>
+                  Brak serii tego ćwiczenia w wybranym okresie.
+                </div>
+              )}
+              {!exLoading && exData && exData.perDay.length > 0 && exChart()}
+            </div>
           )}
 
           <div className="tp-mf">
