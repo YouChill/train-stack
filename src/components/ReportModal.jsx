@@ -1,8 +1,8 @@
-import { useState, useEffect } from 'react'
-import { Copy, X } from 'lucide-react'
+import { useState, useEffect, useRef } from 'react'
+import { Copy, Download, FileSpreadsheet, Share2, X } from 'lucide-react'
 import * as api from '../api.js'
 import { toast } from './Toasts.jsx'
-import { buildReportText } from '../report-text.js'
+import { buildReportText, buildSessionsCsv } from '../report-text.js'
 import { plural } from '../utils.js'
 
 const FEELINGS = ['', '😫', '😓', '😐', '💪', '🔥']
@@ -38,6 +38,15 @@ export default function ReportModal({ discs, onClose }) {
   const [range, setRange] = useState(() => lastNDays(7))
   const [data, setData] = useState(null)
   const [loading, setLoading] = useState(true)
+  const [expMenu, setExpMenu] = useState(false)
+  const expRef = useRef(null)
+
+  useEffect(() => {
+    if (!expMenu) return
+    const close = (e) => { if (!expRef.current?.contains(e.target)) setExpMenu(false) }
+    document.addEventListener('mousedown', close)
+    return () => document.removeEventListener('mousedown', close)
+  }, [expMenu])
 
   const pickPreset = (p) => {
     setPreset(p.key)
@@ -65,9 +74,35 @@ export default function ReportModal({ discs, onClose }) {
     }
   }
 
+  const download = (name, text, mime) => {
+    const url = URL.createObjectURL(new Blob([text], { type: mime }))
+    const a = document.createElement('a')
+    a.href = url
+    a.download = name
+    a.click()
+    URL.revokeObjectURL(url)
+  }
+
+  const downloadMd = () =>
+    download(`raport-${range.from}_${range.to}.md`, buildReportText(data, discs), 'text/markdown;charset=utf-8')
+
+  const downloadCsv = () =>
+    download(`treningi-${range.from}_${range.to}.csv`, buildSessionsCsv(data, discs), 'text/csv;charset=utf-8')
+
+  // Na telefonie najnaturalniejszy jest systemowy arkusz udostępniania
+  const share = async () => {
+    try {
+      await navigator.share({ title: 'Raport treningowy', text: buildReportText(data, discs) })
+    } catch { /* anulowane przez użytkownika */ }
+  }
+
+  const pickExp = (fn) => () => { setExpMenu(false); fn() }
+
   const empty = data && data.kpi.sessions === 0
 
-  // Pełna oś dni okresu (dni bez treningu = 0), max 31 słupków czytelnie
+  // Pełna oś dni okresu (dni bez treningu = 0), max 31 słupków czytelnie.
+  // Etykiety zawsze jednoliniowe (miesiąc tylko przy ≤8 słupkach) — dłuższa,
+  // zawinięta etykieta podnosiła całą kolumnę i słupki traciły wspólną bazę.
   const dayBars = () => {
     const counts = Object.fromEntries(data.perDay.map((d) => [d.date, d.count]))
     const [y, m, dd] = range.from.split('-').map(Number)
@@ -79,6 +114,7 @@ export default function ReportModal({ discs, onClose }) {
     }
     const max = Math.max(1, ...bars.map((b) => b.count))
     const dense = bars.length > 16
+    const withMonth = bars.length <= 8
     const labelEvery = dense ? Math.ceil(bars.length / 6) : 1
     return (
       <div className={`tp-stat-weeks${dense ? ' dense' : ''}`}>
@@ -88,7 +124,9 @@ export default function ReportModal({ discs, onClose }) {
             {!dense && <div className="tp-stat-week-cnt">{b.count || ''}</div>}
             <div className="tp-stat-week-lbl">
               {i % labelEvery === 0
-                ? b.dt.toLocaleDateString('pl', { day: 'numeric', month: dense ? 'numeric' : 'short' })
+                ? (withMonth
+                    ? b.dt.toLocaleDateString('pl', { day: 'numeric', month: 'short' })
+                    : b.dt.getDate())
                 : ''}
             </div>
           </div>
@@ -243,7 +281,21 @@ export default function ReportModal({ discs, onClose }) {
 
           <div className="tp-mf">
             {!loading && data && !empty && (
-              <button className="tp-btn tp-bp" onClick={copy}><Copy size={12} /> Kopiuj tekst</button>
+              <div className="tp-exp-wrap" ref={expRef}>
+                <button className="tp-btn tp-bp" onClick={() => setExpMenu((m) => !m)}>
+                  <Share2 size={12} /> Eksport
+                </button>
+                {expMenu && (
+                  <div className="tp-exp-menu">
+                    {typeof navigator.share === 'function' && (
+                      <button className="tp-menu-it" onClick={pickExp(share)}><Share2 size={13} /> Udostępnij…</button>
+                    )}
+                    <button className="tp-menu-it" onClick={pickExp(copy)}><Copy size={13} /> Kopiuj tekst</button>
+                    <button className="tp-menu-it" onClick={pickExp(downloadMd)}><Download size={13} /> Pobierz .md</button>
+                    <button className="tp-menu-it" onClick={pickExp(downloadCsv)}><FileSpreadsheet size={13} /> Pobierz CSV</button>
+                  </div>
+                )}
+              </div>
             )}
             <button className="tp-btn tp-bg" onClick={onClose}>Zamknij</button>
           </div>

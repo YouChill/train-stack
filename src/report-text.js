@@ -81,3 +81,18 @@ export function buildReportText(report, discs) {
 
   return L.join('\n')
 }
+
+// CSV sesji pod arkusze kalkulacyjne: średnik jako separator i BOM na
+// początku — polski Excel inaczej nie rozpozna ani kolumn, ani UTF-8.
+export function buildSessionsCsv(report, discs) {
+  const disc = (id) => discs.find((d) => d.id === id) || { name: id }
+  const esc = (v) => {
+    const s = String(v ?? '')
+    return /[;"\r\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s
+  }
+  const rows = [['Data', 'Godzina', 'Dyscyplina', 'Trening', 'Samopoczucie (1-5)', 'Notatka']]
+  for (const s of report.sessions) {
+    rows.push([s.date, s.time, disc(s.discipline).name, s.title || '', s.feeling ?? '', s.note || ''])
+  }
+  return '\ufeff' + rows.map((r) => r.map(esc).join(';')).join('\r\n')
+}

@@ -305,10 +305,9 @@ input[type="time"],input[type="date"]{color-scheme:light;}
 .tp-stat-weeks{display:flex;gap:4px;align-items:flex-end;height:80px;padding-top:10px;}
 .tp-stat-week{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;gap:2px;}
 .tp-stat-week-bar{width:100%;background:var(--lime-border);border-radius:3px 3px 0 0;min-height:4px;transition:height .3s;}
-.tp-stat-week-cnt{font-size:10px;font-weight:700;color:var(--lime-ink);}
-.tp-stat-week-lbl{font-size:9px;color:var(--ink-3);text-align:center;}
+.tp-stat-week-cnt{font-size:10px;font-weight:700;color:var(--lime-ink);height:13px;}
+.tp-stat-week-lbl{font-size:9px;color:var(--ink-3);text-align:center;white-space:nowrap;height:12px;}
 .tp-stat-weeks.dense{gap:2px;}
-.tp-stat-weeks.dense .tp-stat-week-lbl{white-space:nowrap;}
 
 /* Report */
 .tp-rep-presets{display:flex;gap:4px;margin-bottom:12px;flex-wrap:wrap;}
@@ -326,6 +325,8 @@ input[type="time"],input[type="date"]{color-scheme:light;}
 .tp-rep-ex-trend{font-size:11px;font-weight:700;white-space:nowrap;}
 .tp-rep-ex-trend.up{color:var(--lime-ink);}
 .tp-rep-ex-trend.down{color:var(--danger);}
+.tp-exp-wrap{position:relative;display:flex;}
+.tp-exp-menu{position:absolute;bottom:calc(100% + 8px);right:0;background:var(--card);border:1px solid var(--border);border-radius:10px;box-shadow:0 12px 32px rgba(20,30,55,.18);padding:5px;min-width:190px;z-index:120;display:flex;flex-direction:column;gap:1px;animation:pop-in .15s ease;}
 
 /* Log history */
 .tp-log-list{max-height:400px;overflow-y:auto;}
