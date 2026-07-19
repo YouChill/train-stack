@@ -307,6 +307,25 @@ input[type="time"],input[type="date"]{color-scheme:light;}
 .tp-stat-week-bar{width:100%;background:var(--lime-border);border-radius:3px 3px 0 0;min-height:4px;transition:height .3s;}
 .tp-stat-week-cnt{font-size:10px;font-weight:700;color:var(--lime-ink);}
 .tp-stat-week-lbl{font-size:9px;color:var(--ink-3);text-align:center;}
+.tp-stat-weeks.dense{gap:2px;}
+.tp-stat-weeks.dense .tp-stat-week-lbl{white-space:nowrap;}
+
+/* Report */
+.tp-rep-presets{display:flex;gap:4px;margin-bottom:12px;flex-wrap:wrap;}
+.tp-rep-preset{padding:6px 12px;border-radius:999px;border:1px solid var(--border);background:transparent;color:var(--ink-3);font-size:12px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all .15s;}
+.tp-rep-preset:hover{background:var(--surface);color:var(--ink);}
+.tp-rep-preset.active{background:#b4f13a18;border-color:var(--lime-border);color:var(--lime-ink);}
+.tp-rep-dates{display:flex;gap:6px;align-items:center;margin-bottom:12px;}
+.tp-rep-dates .tp-inp{width:auto;padding:6px 8px;font-size:12px;}
+.tp-stat-delta{font-size:10px;font-weight:700;margin-top:3px;}
+.tp-stat-delta.up{color:var(--lime-ink);}
+.tp-stat-delta.down{color:var(--danger);}
+.tp-rep-ex{display:flex;align-items:baseline;gap:8px;margin-bottom:6px;}
+.tp-rep-ex-name{flex:1;font-size:12px;font-weight:600;color:var(--ink);min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.tp-rep-ex-meta{font-size:11px;color:var(--ink-3);white-space:nowrap;}
+.tp-rep-ex-trend{font-size:11px;font-weight:700;white-space:nowrap;}
+.tp-rep-ex-trend.up{color:var(--lime-ink);}
+.tp-rep-ex-trend.down{color:var(--danger);}
 
 /* Log history */
 .tp-log-list{max-height:400px;overflow-y:auto;}
