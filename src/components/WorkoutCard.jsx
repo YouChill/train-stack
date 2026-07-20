@@ -1,17 +1,32 @@
+import { useState } from 'react'
 import { Check, ClipboardList, Clock, Dumbbell, Edit3, History, Moon, Repeat } from 'lucide-react'
 import ConfirmDelete from './ConfirmDelete.jsx'
 import { plural } from '../utils.js'
 
-export default function WorkoutCard({ w, discs, logCount, onView, onEdit, onDelete, onDeleteSeries, onToggle, onTrack, onViewLog }) {
+// Typ danych przeciągania rozpoznawany przez kolumny dni (musi być małymi literami)
+export const DRAG_MIME = 'application/x-trainstack-workout'
+
+export default function WorkoutCard({ w, discs, logCount, draggable, onView, onEdit, onDelete, onDeleteSeries, onToggle, onTrack, onViewLog }) {
   const d = discs.find((x) => x.id === w.discipline) || discs[0]
   const filled = (w.params || []).filter((p) => p.value)
   const exCnt = (w.exercises || []).length
   const logged = logCount > 0
+  const [dragging, setDragging] = useState(false)
 
-  if (w.rest) return <div className="tp-rest-card"><Moon size={13} /> Odpoczynek</div>
+  const dragProps = draggable ? {
+    draggable: true,
+    onDragStart: (e) => {
+      e.dataTransfer.setData(DRAG_MIME, JSON.stringify({ id: w.id, day: w.day }))
+      e.dataTransfer.effectAllowed = 'move'
+      setDragging(true)
+    },
+    onDragEnd: () => setDragging(false),
+  } : {}
+
+  if (w.rest) return <div className={`tp-rest-card${dragging ? ' dragging' : ''}`} {...dragProps}><Moon size={13} /> Odpoczynek</div>
 
   return (
-    <div className={`tp-card${w.done ? ' done' : ''}`} style={{ '--dc': d.color }} onClick={() => onView(w)}>
+    <div className={`tp-card${w.done ? ' done' : ''}${dragging ? ' dragging' : ''}`} style={{ '--dc': d.color }} onClick={() => onView(w)} {...dragProps}>
       <div className="tp-card-top">
         <div className="tp-card-badge" style={{ background: d.color + '22', color: d.color }}>
           <span>{d.icon}</span>
