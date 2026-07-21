@@ -335,6 +335,30 @@ export default function App() {
     }
   }
 
+  // Przeniesienie treningu na inny dzień tygodnia (drag and drop w widoku tygodnia)
+  const moveW = async (fromDay, toDay, id) => {
+    if (fromDay === toDay) return
+    const fromK = wk(fromDay)
+    const toK   = wk(toDay)
+    const target = (wkts[fromK] || []).find((w) => w.id === id)
+    if (!target) return
+    const moved = { ...target, day: toDay }
+    const snapshot = { [fromK]: wkts[fromK] || [], [toK]: wkts[toK] || [] }
+    setWkts((prev) => ({
+      ...prev,
+      [fromK]: (prev[fromK] || []).filter((w) => w.id !== id),
+      [toK]:   [...(prev[toK] || []), moved],
+    }))
+    if (user) {
+      try {
+        await api.workouts.update(id, moved)
+      } catch (e) {
+        setWkts((prev) => ({ ...prev, ...snapshot }))
+        toast('Nie udało się przenieść: ' + e.message)
+      }
+    }
+  }
+
   // ── IMPORT ────────────────────────────────────────────────────────────────
   const importW = async (parsed) => {
     if (user) {
@@ -485,6 +509,7 @@ export default function App() {
                 onToggle={(id) => toggle(day.key, id)}
                 onTrack={(w)  => setTrackM(w)}
                 onViewLog={(w) => setJournalM(w)}
+                onDropWorkout={(fromDay, id) => moveW(fromDay, day.key, id)}
               />
             ))}
           </main>
