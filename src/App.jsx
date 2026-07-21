@@ -510,6 +510,7 @@ export default function App() {
                 onTrack={(w)  => setTrackM(w)}
                 onViewLog={(w) => setJournalM(w)}
                 onDropWorkout={(fromDay, id) => moveW(fromDay, day.key, id)}
+                onMoveWorkout={moveW}
               />
             ))}
           </main>

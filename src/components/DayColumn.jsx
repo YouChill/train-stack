@@ -3,7 +3,7 @@ import { Plus } from 'lucide-react'
 import { isToday } from '../utils.js'
 import WorkoutCard, { DRAG_MIME } from './WorkoutCard.jsx'
 
-export default function DayColumn({ day, workouts, discs, logCounts, onAdd, onView, onEdit, onDelete, onDeleteSeries, onToggle, onTrack, onViewLog, onDropWorkout }) {
+export default function DayColumn({ day, workouts, discs, logCounts, onAdd, onView, onEdit, onDelete, onDeleteSeries, onToggle, onTrack, onViewLog, onDropWorkout, onMoveWorkout }) {
   const today = isToday(day.date)
   const colRef = useRef(null)
 
@@ -66,6 +66,7 @@ export default function DayColumn({ day, workouts, discs, logCounts, onAdd, onVi
     <div
       className={`tp-col${dragOver ? ' drag-over' : ''}`}
       ref={colRef}
+      data-day={day.key}
       onDragEnter={handleDragEnter}
       onDragOver={handleDragOver}
       onDragLeave={handleDragLeave}
@@ -89,6 +90,7 @@ export default function DayColumn({ day, workouts, discs, logCounts, onAdd, onVi
             discs={discs}
             logCount={logCounts[w.id] || 0}
             draggable
+            onMove={onMoveWorkout}
             onView={onView}
             onEdit={onEdit}
             onDelete={onDelete}

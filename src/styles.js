@@ -120,8 +120,11 @@ button:focus-visible,a:focus-visible,[tabindex]:focus-visible{outline:2px solid 
 .tp-day-n{font-family:'Barlow Condensed',sans-serif;font-size:28px;font-weight:800;line-height:1;color:#a8b4c8;}
 .tp-day-n.today{color:var(--lime-ink);}
 .tp-col-body{flex:1;padding:7px;display:flex;flex-direction:column;gap:5px;}
-.tp-col.drag-over{background:#b4f13a18;box-shadow:inset 0 0 0 2px var(--lime-border);}
-.tp-col.drag-over .tp-col-hd{background:transparent;}
+.tp-col.drag-over,.tp-col.tp-touch-over{background:#b4f13a18;box-shadow:inset 0 0 0 2px var(--lime-border);}
+.tp-col.drag-over .tp-col-hd,.tp-col.tp-touch-over .tp-col-hd{background:transparent;}
+/* Unoszony klon karty podążający za palcem podczas przeciągania dotykowego */
+.tp-touch-clone{position:fixed;z-index:1000;pointer-events:none;margin:0;opacity:.92;transform:scale(1.03);box-shadow:0 10px 26px rgba(20,30,55,.28);}
+body.tp-touch-dragging{user-select:none;-webkit-user-select:none;}
 
 ::-webkit-scrollbar{width:3px;}
 ::-webkit-scrollbar-track{background:transparent;}
