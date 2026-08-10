@@ -45,6 +45,52 @@ export const fmtDate = (d) =>
 export const isToday = (d) =>
   new Date().toDateString() === d.toDateString()
 
+// Importowane plany (i wpisy agenta) mogły trafić do bazy w dowolnym kształcie:
+// params jako obiekt zamiast tablicy, element bez "key", wartości będące
+// obiektami, start_time liczbą. Komponenty zakładają ścisły format, więc każdy
+// trening przechodzący z serwera lub importu do stanu sprowadzamy do niego tu —
+// inaczej pojedynczy zepsuty wiersz wywala render całej aplikacji.
+const asText = (v) => (v == null || typeof v === 'object' ? '' : String(v))
+
+// Widok dnia dopasowuje treningi do slotów po godzinie z "HH:MM" — start_time
+// w innym formacie nie crashuje, ale czyni wpis niewidocznym na osi czasu.
+const asTime = (v) => {
+  const t = asText(v).trim()
+  return /^\d{1,2}:\d{2}$/.test(t) ? t : ''
+}
+
+export const normalizeWorkout = (w) => {
+  if (!w || typeof w !== 'object' || Array.isArray(w)) return null
+
+  let params = w.params
+  if (params && typeof params === 'object' && !Array.isArray(params)) {
+    params = Object.entries(params).map(([key, value]) => ({ key, value }))
+  }
+  params = (Array.isArray(params) ? params : [])
+    .filter((p) => p && typeof p === 'object' && !Array.isArray(p))
+    .map((p) => ({ ...p, key: asText(p.key), value: asText(p.value), unit: asText(p.unit) }))
+
+  const exercises = (Array.isArray(w.exercises) ? w.exercises : [])
+    .map((ex) => (typeof ex === 'string' ? { name: ex } : ex))
+    .filter((ex) => ex && typeof ex === 'object' && !Array.isArray(ex))
+    .map((ex) => ({
+      ...ex,
+      name: asText(ex.name), sets: asText(ex.sets), reps: asText(ex.reps),
+      load: asText(ex.load), loadUnit: asText(ex.loadUnit),
+    }))
+
+  return {
+    ...w,
+    title: asText(w.title),
+    notes: asText(w.notes),
+    start_time: asTime(w.start_time),
+    params,
+    exercises,
+    rest: !!w.rest,
+    done: !!w.done,
+  }
+}
+
 // Polska odmiana rzeczownika po liczebniku, np. plural(5, 'ćwiczenie', 'ćwiczenia', 'ćwiczeń')
 export const plural = (n, one, few, many) => {
   if (n === 1) return one

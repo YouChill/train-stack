@@ -1,6 +1,7 @@
 import crypto from 'crypto'
 import getPool from '../_db.js'
 import { rateLimit, clientIp } from '../_ratelimit.js'
+import { sanitizeParams, sanitizeExercises, sanitizeText, sanitizeStartTime } from '../_sanitize.js'
 
 // Endpoint dla agenta (integracje maszynowe): zamiast JWT zalogowanego
 // użytkownika uwierzytelnia się stałym kluczem AGENT_API_KEY z env i wskazuje
@@ -69,9 +70,9 @@ async function findUser(pool, ident) {
 
 function normalizeWorkout(w, day) {
   return [
-    w.discipline || '', day, w.title || '', w.notes || '',
-    JSON.stringify(w.params || []), JSON.stringify(w.exercises || []),
-    w.rest || false, w.done || false, w.start_time || '',
+    w.discipline || '', day, sanitizeText(w.title), sanitizeText(w.notes),
+    JSON.stringify(sanitizeParams(w.params)), JSON.stringify(sanitizeExercises(w.exercises)),
+    w.rest || false, w.done || false, sanitizeStartTime(w.start_time),
     JSON.stringify(w.recurrence || null), w.series_id || null,
   ]
 }
@@ -151,7 +152,12 @@ export default async function handler(req, res) {
       const values = []
       for (const f of WRITABLE_FIELDS) {
         if (body[f] === undefined) continue
-        values.push(JSON_FIELDS.has(f) ? JSON.stringify(body[f]) : body[f])
+        let v = body[f]
+        if (f === 'params') v = sanitizeParams(v)
+        else if (f === 'exercises') v = sanitizeExercises(v)
+        else if (f === 'title' || f === 'notes') v = sanitizeText(v)
+        else if (f === 'start_time') v = sanitizeStartTime(v)
+        values.push(JSON_FIELDS.has(f) ? JSON.stringify(v) : v)
         sets.push(`${f} = $${values.length}`)
       }
       if (body.week_start !== undefined) {
