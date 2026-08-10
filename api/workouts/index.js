@@ -1,5 +1,6 @@
 import getPool from '../_db.js'
 import { verifyUser, cors } from '../_auth.js'
+import { sanitizeParams, sanitizeExercises, sanitizeText, sanitizeStartTime } from '../_sanitize.js'
 
 // Kolumna workouts.day to VARCHAR(3) — dłuższy klucz (np. "thu_stretch")
 // wywalał cały import; walidujemy z góry i zwracamy czytelny błąd.
@@ -48,9 +49,9 @@ export default async function handler(req, res) {
       const { rows } = await pool.query(
         `UPDATE workouts SET discipline=$1, day=$2, title=$3, notes=$4, params=$5, exercises=$6, rest=$7, done=$8, start_time=$9, recurrence=$10
          WHERE id=$11 AND user_id=$12 RETURNING *`,
-        [discipline, day, title || '', notes || '',
-         JSON.stringify(params || []), JSON.stringify(exercises || []), rest || false, done || false,
-         start_time || '', JSON.stringify(recurrence || null),
+        [discipline, day, sanitizeText(title), sanitizeText(notes),
+         JSON.stringify(sanitizeParams(params)), JSON.stringify(sanitizeExercises(exercises)), rest || false, done || false,
+         sanitizeStartTime(start_time), JSON.stringify(recurrence || null),
          id, userId]
       )
       if (!rows.length) return res.status(404).json({ error: 'Nie znaleziono' })
@@ -123,6 +124,17 @@ export default async function handler(req, res) {
             error: `Nieprawidłowy dzień "${badDay}" — dozwolone: ${VALID_DAYS.join(', ')}`,
           })
         }
+        // Zły kształt odrzucamy przed transakcją — raz zapisany wraca do
+        // frontendu przy każdym pobraniu tygodnia.
+        for (const [day, list] of Object.entries(week)) {
+          if (list != null && !Array.isArray(list)) {
+            return res.status(400).json({ error: `Dzień "${day}" musi być tablicą treningów` })
+          }
+          const badW = (list || []).findIndex((w) => !w || typeof w !== 'object' || Array.isArray(w))
+          if (badW !== -1) {
+            return res.status(400).json({ error: `Trening ${badW + 1} w dniu "${day}" musi być obiektem` })
+          }
+        }
         const ws = week_start || (await currentMonday(pool))
 
         // Wymiana całego tygodnia w jednej transakcji — błąd przy dowolnym
@@ -136,9 +148,9 @@ export default async function handler(req, res) {
               await client.query(
                 `INSERT INTO workouts (user_id, discipline, day, week_start, title, notes, params, exercises, rest, done, start_time, recurrence)
                  VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12)`,
-                [userId, w.discipline || '', day, ws, w.title || '', w.notes || '',
-                 JSON.stringify(w.params || []), JSON.stringify(w.exercises || []), w.rest || false, false,
-                 w.start_time || '', JSON.stringify(w.recurrence || null)]
+                [userId, w.discipline || '', day, ws, sanitizeText(w.title), sanitizeText(w.notes),
+                 JSON.stringify(sanitizeParams(w.params)), JSON.stringify(sanitizeExercises(w.exercises)), w.rest || false, false,
+                 sanitizeStartTime(w.start_time), JSON.stringify(w.recurrence || null)]
               )
             }
           }
@@ -163,9 +175,9 @@ export default async function handler(req, res) {
       const { rows } = await pool.query(
         `INSERT INTO workouts (user_id, discipline, day, week_start, title, notes, params, exercises, rest, done, start_time, recurrence, series_id)
          VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13) RETURNING *`,
-        [userId, discipline, day, ws, title || '', notes || '',
-         JSON.stringify(params || []), JSON.stringify(exercises || []), rest || false, done || false,
-         start_time || '', JSON.stringify(recurrence || null), series_id || null]
+        [userId, discipline, day, ws, sanitizeText(title), sanitizeText(notes),
+         JSON.stringify(sanitizeParams(params)), JSON.stringify(sanitizeExercises(exercises)), rest || false, done || false,
+         sanitizeStartTime(start_time), JSON.stringify(recurrence || null), series_id || null]
       )
       return res.status(201).json(rows[0])
     }

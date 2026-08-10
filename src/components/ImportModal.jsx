@@ -21,6 +21,8 @@ const WORKOUT_FIELDS = [
 // Klucze tygodnia muszą być dokładnie mon..sun — inaczej wpis nigdzie się nie
 // wyświetli (a serwer odrzuci insert). Kilka treningów tego samego dnia to
 // kilka elementów jednej tablicy, nie osobne klucze typu "thu_stretch".
+// Kształt treningów też walidujemy tutaj: raz zapisany zły format (params jako
+// obiekt, trening jako string) wraca z serwera przy każdym starcie aplikacji.
 function checkDays(week) {
   const bad = Object.keys(week || {}).filter((k) => !DAY_KEYS.includes(k))
   if (bad.length) {
@@ -28,6 +30,22 @@ function checkDays(week) {
       `nieprawidłowy dzień "${bad[0]}" — dozwolone klucze to: ${DAY_KEYS.join(', ')}. ` +
       'Kilka treningów tego samego dnia umieść jako elementy jednej tablicy.'
     )
+  }
+  for (const [day, list] of Object.entries(week || {})) {
+    if (!Array.isArray(list)) {
+      throw new Error(`dzień "${day}" musi być tablicą treningów, np. "${day}": [{ ... }]`)
+    }
+    list.forEach((w, i) => {
+      if (!w || typeof w !== 'object' || Array.isArray(w)) {
+        throw new Error(`trening ${i + 1} w dniu "${day}" musi być obiektem { ... }`)
+      }
+      if (w.params !== undefined && !Array.isArray(w.params)) {
+        throw new Error(`"params" treningu ${i + 1} w dniu "${day}" musi być tablicą elementów {"key","value","unit"}`)
+      }
+      if (w.exercises !== undefined && !Array.isArray(w.exercises)) {
+        throw new Error(`"exercises" treningu ${i + 1} w dniu "${day}" musi być tablicą elementów {"name","sets","reps"}`)
+      }
+    })
   }
 }
 

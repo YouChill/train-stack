@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
 import CSS from './styles.js'
 import { DAYS, DEFAULT_DISCIPLINES } from './constants.js'
-import { uid, getWeekDates, weekStartStr } from './utils.js'
+import { uid, getWeekDates, weekStartStr, normalizeWorkout } from './utils.js'
 import * as api from './api.js'
 
 import Header      from './components/Header.jsx'
@@ -149,9 +149,11 @@ export default function App() {
       const rows = await api.workouts.list(weekStartStr(weekOff))
       const grouped = {}
       for (const r of rows) {
-        const k = `${weekOff}|${r.day}`
+        const w = normalizeWorkout(r)
+        if (!w) continue
+        const k = `${weekOff}|${w.day}`
         if (!grouped[k]) grouped[k] = []
-        grouped[k].push(r)
+        grouped[k].push(w)
       }
       setWkts((prev) => {
         // clear old keys for this week offset, add new
@@ -366,9 +368,11 @@ export default function App() {
         const rows = await api.workouts.import_({ week_start: weekStartStr(off), week: parsed.week })
         const grouped = {}
         for (const r of rows) {
-          const k = `${off}|${r.day}`
+          const w = normalizeWorkout(r)
+          if (!w) continue
+          const k = `${off}|${w.day}`
           if (!grouped[k]) grouped[k] = []
-          grouped[k].push(r)
+          grouped[k].push(w)
         }
         setWkts((prev) => {
           const next = { ...prev }
@@ -386,7 +390,10 @@ export default function App() {
       const weeks = parsed.weeks || { [off]: parsed.week }
       for (const [o, days_] of Object.entries(weeks)) {
         for (const [d, list] of Object.entries(days_)) {
-          ns[`${o}|${d}`] = (list || []).map((w) => ({ ...w, id: uid(), done: false }))
+          ns[`${o}|${d}`] = (Array.isArray(list) ? list : [])
+            .map(normalizeWorkout)
+            .filter(Boolean)
+            .map((w) => ({ ...w, id: uid(), done: false }))
         }
       }
       setWkts(ns)

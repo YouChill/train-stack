@@ -26,7 +26,7 @@ export default function DayView({ days, wkts, off, selDay, setSelDay, discs, log
 
   const wk = (dayKey) => `${off}|${dayKey}`
   const list = useMemo(
-    () => (wkts[wk(selDay)] || []).slice().sort((a, b) => (a.start_time || 'zz').localeCompare(b.start_time || 'zz')),
+    () => (wkts[wk(selDay)] || []).slice().sort((a, b) => String(a.start_time || 'zz').localeCompare(String(b.start_time || 'zz'))),
     [wkts, selDay, off],
   )
 
@@ -40,9 +40,11 @@ export default function DayView({ days, wkts, off, selDay, setSelDay, discs, log
     return acc + exVol
   }, 0)
   const totalMin = list.reduce((acc, w) => {
-    const p = (w.params || []).find(
-      (x) => x.unit === 'min' && (x.key.toLowerCase().includes('czas') || x.key.toLowerCase().includes('trwan')),
-    )
+    const p = (w.params || []).find((x) => {
+      // Zaimportowane params bywają bez "key" — nie zakładaj, że to string
+      const key = String(x?.key || '').toLowerCase()
+      return x?.unit === 'min' && (key.includes('czas') || key.includes('trwan'))
+    })
     return acc + (p ? parseFloat(p.value) || 0 : 0)
   }, 0)
 
@@ -51,7 +53,7 @@ export default function DayView({ days, wkts, off, selDay, setSelDay, discs, log
     h,
     items: list.filter((w) => {
       if (!w.start_time) return false
-      return parseInt(w.start_time.split(':')[0]) === h
+      return parseInt(String(w.start_time).split(':')[0]) === h
     }),
   }))
   const unscheduled = list.filter((w) => !w.start_time && !w.rest)
