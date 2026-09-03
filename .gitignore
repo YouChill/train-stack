@@ -2,3 +2,7 @@ node_modules
 dist
 .DS_Store
 .env
+
+# Garmin sync (scripts/garmin-sync)
+.garmin-tokens/
+.sync-state.json

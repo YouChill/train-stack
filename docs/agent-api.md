@@ -108,6 +108,19 @@ błąd nie zostawi tygodnia w połowie skasowanego).
 DELETE /api/agent?user=jan@example.com&id=12
 ```
 
+### Import wykonanych aktywności
+
+```
+POST /api/agent?user=jan@example.com&action=activities
+{ "activities": [ { "external_id": "gc:123", "started_at_local": "2026-08-31T07:12:05",
+                    "type": "running", "title": "Bieg", "duration_s": 3120, "distance_m": 10250 } ],
+  "dry_run": false }
+```
+
+Aktywności trafiają do dziennika i są dopasowywane do zaplanowanych
+treningów; format, statusy i deduplikacja opisane w `docs/garmin.md`. Z tego
+wywołania korzysta skrypt `scripts/garmin-sync`.
+
 ## Przykłady curl (z plikiem środowiskowym)
 
 ```bash

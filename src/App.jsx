@@ -9,6 +9,7 @@ import DayColumn   from './components/DayColumn.jsx'
 import DayView     from './components/DayView.jsx'
 import AddModal    from './components/AddModal.jsx'
 import ImportModal from './components/ImportModal.jsx'
+import GarminImportModal from './components/GarminImportModal.jsx'
 import AIModal     from './components/AIModal.jsx'
 import CatModal    from './components/CatModal.jsx'
 import AuthModal   from './components/AuthModal.jsx'
@@ -104,6 +105,7 @@ export default function App() {
 
   const [addM,  setAddM]  = useState(null)
   const [impM,  setImpM]  = useState(false)
+  const [garminM, setGarminM] = useState(false)
   const [aiM,   setAiM]   = useState(false)
   const [catM,  setCatM]  = useState(false)
   const [trackM, setTrackM] = useState(null)  // workout to track
@@ -473,6 +475,7 @@ export default function App() {
           onToday={() => { setOff(0); setSelDay(getTodayKey()) }}
           onAdd={() => setAddM({ day: view === 'day' ? selDay : undefined })}
           onImport={() => setImpM(true)}
+          onGarmin={() => setGarminM(true)}
           onAI={()    => setAiM(true)}
           onCat={()   => setCatM(true)}
           onStats={() => setStatsM(true)}
@@ -535,6 +538,14 @@ export default function App() {
         />
       )}
       {impM && <ImportModal discs={discs} onImport={importW} onClose={() => setImpM(false)} />}
+      {garminM && (
+        <GarminImportModal
+          user={user}
+          discs={discs}
+          onDone={() => { fetchWeek(off); fetchLogCounts() }}
+          onClose={() => setGarminM(false)}
+        />
+      )}
       {aiM  && <AIModal discs={discs} onImport={importW} onClose={() => setAiM(false)} />}
       {catM && <CatModal discs={discs} onChange={saveDiscs} onClose={() => setCatM(false)} />}
       {trackM && <TrackingModal workout={trackM} discs={discs} onSave={saveLog} onClose={() => setTrackM(null)} />}

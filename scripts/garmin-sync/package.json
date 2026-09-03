@@ -1,0 +1,15 @@
+{
+  "name": "trainstack-garmin-sync",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Synchronizacja aktywności z Garmin Connect do TrainStack (przez /api/agent)",
+  "scripts": {
+    "sync": "node --env-file=.env sync.mjs",
+    "dry-run": "node --env-file=.env sync.mjs --dry-run"
+  },
+  "engines": { "node": ">=20.6" },
+  "dependencies": {
+    "garmin-connect": "^1.6.2"
+  }
+}
