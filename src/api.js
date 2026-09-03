@@ -72,6 +72,10 @@ export const report = {
       exercise ? `&exercise=${encodeURIComponent(exercise)}` : ''}`),
 }
 
+export const activities = {
+  import_: (body) => request('/api/activities', { method: 'POST', body: JSON.stringify(body) }),
+}
+
 export const ai = {
   generate: (body) => request('/api/ai', { method: 'POST', body: JSON.stringify(body) }),
 }

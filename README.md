@@ -25,6 +25,13 @@ PostgreSQL (Supabase).
   podstawie opisu użytkownika (limitowane per użytkownik).
 - **Import JSON** — wczytanie gotowego planu tygodnia z JSON (format opisany
   w modalu importu).
+- **Import z Garmin** — wgranie plików FIT (ZIP z „Eksportuj oryginał”) lub
+  CSV z listy aktywności Garmin Connect; aktywności trafiają do dziennika,
+  dopasowane do zaplanowanych treningów (albo jako nowe, wykonane treningi),
+  z deduplikacją. Do automatyzacji służy skrypt `scripts/garmin-sync`
+  (nieoficjalne API Garmin Connect → `/api/agent`). Szczegóły: `docs/garmin.md`.
+- **API agenta** — `/api/agent` z kluczem `AGENT_API_KEY` do odczytu i edycji
+  planów oraz importu aktywności przez integracje maszynowe (`docs/agent-api.md`).
 - **Konta użytkowników** — rejestracja, logowanie (JWT), reset hasła mailem
   (Nodemailer + Gmail).
 
@@ -39,6 +46,7 @@ PostgreSQL (Supabase).
 | Auth | JWT (`jsonwebtoken`) + bcrypt, wersjonowanie tokenów |
 | Mail | Nodemailer (Gmail, hasło aplikacji) |
 | AI | OpenAI Chat Completions |
+| Garmin | `@garmin/fitsdk` (parsowanie FIT w przeglądarce), `garmin-connect` (skrypt synchronizacji) |
 
 ## Struktura repozytorium
 
@@ -48,6 +56,8 @@ api/                  Funkcje serverless (Vercel) — właściwy backend
   _db.js              Pula połączeń pg (współdzielona)
   _mail.js            Wysyłka maili (reset hasła)
   _ratelimit.js       Rate limiting oparty o tabelę rate_limits
+  _sanitize.js        Sanityzacja params/exercises przed zapisem do JSONB
+  _activities.js      Import aktywności: mapowanie typów, dopasowanie do planu, deduplikacja
   auth/index.js       ?action=me|register|login|request-reset|reset-password
   workouts/index.js   CRUD treningów (tydzień)
   disciplines/index.js  CRUD dyscyplin
@@ -56,16 +66,20 @@ api/                  Funkcje serverless (Vercel) — właściwy backend
   stats.js            Statystyki globalne
   report.js           Raport okresowy (agregacje per dzień/dyscyplina/ćwiczenie)
   ai.js               Generowanie planu przez OpenAI
+  activities.js       Import aktywności (Garmin) dla zalogowanego użytkownika
+  agent/index.js      API agenta (klucz AGENT_API_KEY): plan tygodnia, edycja, import aktywności
 src/                  Frontend React
   App.jsx             Stan aplikacji i kompozycja widoków
   api.js              Klient HTTP do /api
-  components/         Modale i widoki (Report, Stats, Tracking, AI, Import…)
+  garmin/parse.js     Parser FIT / ZIP / CSV z Garmin Connect (w przeglądarce)
+  components/         Modale i widoki (Report, Stats, Tracking, AI, Import, GarminImport…)
   report-text.js      Budowanie tekstu raportu (Markdown/CSV) do eksportu
 server/               Alternatywny lokalny backend Express (podzbiór API:
                       auth, workouts, disciplines, exercise-logs + /api/health)
-supabase/migrations/  Migracje SQL (001–008)
+supabase/migrations/  Migracje SQL (001–009)
 scripts/migrate.js    Runner migracji (npm run db:migrate)
-docs/                 Notatki projektowe (plan modułu raportowego)
+scripts/garmin-sync/  Skrypt synchronizacji Garmin Connect → TrainStack (osobny package.json)
+docs/                 Dokumentacja: API agenta, integracja z Garminem, plan modułu raportowego
 vercel.json           Build + rewrites (SPA fallback na index.html)
 ```
 
@@ -84,7 +98,8 @@ Frontend woła `/api/*` — lokalnie potrzebny jest backend. Do wyboru:
 - **`vercel dev`** w katalogu głównym — uruchamia funkcje z `api/`
   (pełne API, zalecane), albo
 - **Express z `server/`** — `cd server && npm install && npm run dev`
-  (port 3001; uwaga: nie zawiera endpointów `logs`, `stats`, `report`, `ai`).
+  (port 3001; uwaga: nie zawiera endpointów `logs`, `stats`, `report`, `ai`,
+  `activities`, `agent`).
   Przykładowa konfiguracja: `server/.env.example`.
 
 ### Zmienne środowiskowe
@@ -97,6 +112,7 @@ Frontend woła `/api/*` — lokalnie potrzebny jest backend. Do wyboru:
 | `OPENAI_API_KEY` | dla AI | Klucz OpenAI (generator planu) |
 | `OPENAI_MODEL` | nie | Model OpenAI (domyślny w `api/ai.js`) |
 | `GMAIL_USER`, `GMAIL_APP_PASSWORD` | dla maili | Konto Gmail + hasło aplikacji (reset hasła) |
+| `AGENT_API_KEY` | dla agenta | Klucz `/api/agent` (integracje maszynowe, skrypt Garmin); bez niego endpoint zwraca 503 |
 | `MAIL_FROM_NAME` | nie | Nazwa nadawcy maili |
 | `APP_URL` / `CLIENT_URL` | nie | URL frontendu (linki w mailach / CORS) |
 | `PORT` | nie | Port lokalnego serwera Express (domyślnie 3001) |

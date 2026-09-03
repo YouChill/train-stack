@@ -2,12 +2,14 @@ import crypto from 'crypto'
 import getPool from '../_db.js'
 import { rateLimit, clientIp } from '../_ratelimit.js'
 import { sanitizeParams, sanitizeExercises, sanitizeText, sanitizeStartTime } from '../_sanitize.js'
+import { parseImportBody, importActivities } from '../_activities.js'
 
 // Endpoint dla agenta (integracje maszynowe): zamiast JWT zalogowanego
 // użytkownika uwierzytelnia się stałym kluczem AGENT_API_KEY z env i wskazuje
 // docelowego użytkownika parametrem ?user= (e-mail lub numeryczne id).
 // Pozwala odczytać plan tygodnia, edytować pojedyncze pozycje oraz dodawać
-// treningi — pojedynczo lub całym tygodniem.
+// treningi — pojedynczo lub całym tygodniem — a także importować wykonane
+// aktywności (action=activities; używa tego skrypt scripts/garmin-sync).
 
 const VALID_DAYS = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun']
 
@@ -185,6 +187,15 @@ export default async function handler(req, res) {
 
     if (req.method === 'POST') {
       const body = req.body || {}
+
+      // POST /api/agent?user=X&action=activities — import wykonanych
+      // aktywności do dziennika (ta sama logika co /api/activities dla JWT).
+      if (req.query.action === 'activities') {
+        const parsed = parseImportBody(body)
+        if (parsed.error) return res.status(400).json({ error: parsed.error })
+        const result = await importActivities(pool, userId, parsed.activities, parsed.options)
+        return res.status(parsed.options.dryRun ? 200 : 201).json(result)
+      }
 
       // POST z kluczem "week" — cały tydzień naraz. Domyślnie dokłada wpisy do
       // istniejącego planu; mode:"replace" najpierw czyści wskazany tydzień.

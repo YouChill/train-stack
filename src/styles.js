@@ -174,6 +174,7 @@ body.tp-touch-dragging{user-select:none;-webkit-user-select:none;}
 .tp-ov{position:fixed;inset:0;background:rgba(8,12,20,.87);z-index:200;display:flex;align-items:center;justify-content:center;padding:20px;backdrop-filter:blur(5px);}
 .tp-modal{background:var(--card);border:1px solid var(--border);border-radius:16px;width:100%;max-width:520px;max-height:92vh;overflow-y:auto;position:relative;box-shadow:0 16px 50px rgba(20,30,55,.28);}
 .tp-modal-w{max-width:640px;}
+.tp-modal-xl{max-width:780px;}
 .tp-mi{padding:22px;}
 .tp-mh{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;}
 .tp-mt{font-family:'Barlow Condensed',sans-serif;font-size:22px;font-weight:800;color:var(--ink);}
@@ -267,6 +268,41 @@ body.tp-touch-dragging{user-select:none;-webkit-user-select:none;}
 .tp-imp-chips{display:flex;flex-wrap:wrap;gap:4px;}
 .tp-imp-chip{display:inline-flex;align-items:center;gap:4px;background:var(--card);border:1px solid var(--border-soft);border-radius:5px;padding:2px 6px;font-size:11px;color:var(--ink-2);}
 .tp-imp-chip code{border:none;background:none;padding:0;}
+
+/* Garmin import */
+.tp-gi-drop{display:flex;align-items:center;gap:12px;border:1px dashed var(--border-hover);border-radius:10px;padding:14px 16px;cursor:pointer;color:var(--ink-2);font-size:13px;transition:all .15s;margin-bottom:10px;}
+.tp-gi-drop:hover,.tp-gi-drop.over{border-color:var(--lime-border);background:#b4f13a12;color:var(--ink);}
+.tp-gi-drop-s{font-size:11px;color:var(--ink-3);margin-top:2px;}
+.tp-gi-help{border:1px solid var(--border-soft);border-radius:8px;padding:0 10px;margin-bottom:10px;font-size:12px;color:var(--ink-2);background:var(--surface);}
+.tp-gi-help-p{padding:3px 0;line-height:1.45;}
+.tp-gi-help code{font-family:monospace;font-size:11px;background:var(--card);border:1px solid var(--border-soft);border-radius:4px;padding:0 4px;}
+.tp-gi-errors{margin-bottom:8px;}
+.tp-gi-empty{font-size:13px;color:var(--ink-3);padding:18px 0;text-align:center;}
+.tp-gi-list{border:1px solid var(--border-soft);border-radius:10px;overflow:hidden;max-height:340px;overflow-y:auto;}
+.tp-gi-row{display:grid;grid-template-columns:20px 104px minmax(0,1fr) 150px 150px;gap:8px;align-items:center;padding:7px 10px;border-top:1px solid var(--border-soft);font-size:12px;}
+.tp-gi-row:first-child{border-top:none;}
+.tp-gi-row.muted{opacity:.55;}
+.tp-gi-head{background:var(--surface);font-size:10px;font-weight:700;letter-spacing:.6px;text-transform:uppercase;color:var(--ink-3);}
+.tp-gi-when{color:var(--ink-2);white-space:nowrap;}
+.tp-gi-what{display:flex;flex-direction:column;min-width:0;}
+.tp-gi-title{font-weight:600;color:var(--ink);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.tp-gi-meta{font-size:11px;color:var(--ink-3);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.tp-gi-status{display:flex;flex-direction:column;font-size:11px;font-weight:600;line-height:1.3;}
+.tp-gi-status.ok{color:var(--lime-ink);}
+.tp-gi-status.new{color:var(--violet);}
+.tp-gi-status.dup,.tp-gi-status.warn{color:var(--ink-3);}
+.tp-gi-status.warn{color:#b45309;}
+.tp-gi-status.err{color:var(--danger);}
+.tp-gi-sub{font-weight:400;color:var(--ink-3);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.tp-gi-spin{animation:spin 1s linear infinite;color:var(--ink-4);}
+.tp-gi-done{text-align:center;padding:26px 0 10px;color:var(--lime-ink);}
+.tp-gi-done-t{font-family:'Barlow Condensed',sans-serif;font-size:20px;font-weight:800;color:var(--ink);margin-top:8px;}
+.tp-gi-done-s{font-size:12px;color:var(--ink-3);margin-top:4px;}
+@media (max-width:640px){
+.tp-gi-row{grid-template-columns:20px 1fr;grid-auto-rows:auto;row-gap:4px;}
+.tp-gi-head{display:none;}
+.tp-gi-row .tp-sm,.tp-gi-status{grid-column:2;}
+}
 .tp-err{font-size:12px;color:var(--danger);margin-top:5px;}
 .tp-info{font-size:13px;color:var(--success);}
 
