@@ -678,6 +678,17 @@ input[type="time"],input[type="date"]{color-scheme:light;}
 .tp-ex-footer{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:14px 20px;padding-bottom:calc(14px + env(safe-area-inset-bottom));border-top:1px solid var(--divider);flex-shrink:0;background:var(--card);}
 .tp-ex-footer-actions{display:flex;gap:8px;}
 .tp-btn-saved{background:#ecfccb !important;border-color:var(--lime-border) !important;color:#3f6212 !important;}
+
+/* ── POWIADOMIENIA ── */
+.tp-notify-hint{background:#b4f13a12;border-left:3px solid var(--lime-border);border-radius:7px;padding:11px 13px;margin-bottom:14px;font-size:12px;color:var(--ink-2);line-height:1.5;}
+.tp-notify-hint strong{display:block;color:var(--ink);font-size:13px;margin-bottom:5px;}
+.tp-notify-hint p{margin-bottom:6px;}
+.tp-notify-hint ol{margin:0;padding-left:17px;}
+.tp-notify-hint li{margin-bottom:3px;}
+.tp-notify-warn{background:#ef444410;border-left:3px solid var(--danger);border-radius:7px;padding:11px 13px;margin-bottom:14px;font-size:12px;color:var(--ink-2);line-height:1.5;}
+.tp-dev-row{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:8px 0;border-bottom:1px solid var(--divider);}
+.tp-dev-row:last-child{border-bottom:none;}
+.tp-dev-ua{font-size:10px;color:var(--ink-4);}
 `
 
 export default CSS

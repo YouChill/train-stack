@@ -5,8 +5,15 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
     <meta name="theme-color" content="#1a2233" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <!-- Powiadomienia push na iOS działają wyłącznie w aplikacji uruchomionej
+         z ekranu początkowego, a to wymaga manifestu z display:standalone. -->
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-title" content="TRAINstack" />
     <title>TRAINstack — Planer Treningowy</title>
+    <link rel="manifest" href="/manifest.webmanifest" />
     <link rel="icon" href="/favicon.svg" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
   </head>
   <body style="background:#eef1f6;margin:0">
     <div id="root"></div>

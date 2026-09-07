@@ -79,3 +79,11 @@ export const activities = {
 export const ai = {
   generate: (body) => request('/api/ai', { method: 'POST', body: JSON.stringify(body) }),
 }
+
+export const push = {
+  prefs:       ()     => request('/api/push?action=prefs'),
+  savePrefs:   (body) => request('/api/push?action=prefs',       { method: 'PUT',  body: JSON.stringify(body) }),
+  subscribe:   (body) => request('/api/push?action=subscribe',   { method: 'POST', body: JSON.stringify(body) }),
+  unsubscribe: (body) => request('/api/push?action=unsubscribe', { method: 'POST', body: JSON.stringify(body) }),
+  test:        ()     => request('/api/push?action=test',        { method: 'POST', body: '{}' }),
+}

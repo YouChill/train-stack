@@ -32,6 +32,11 @@ PostgreSQL (Supabase).
   (nieoficjalne API Garmin Connect → `/api/agent`). Szczegóły: `docs/garmin.md`.
 - **API agenta** — `/api/agent` z kluczem `AGENT_API_KEY` do odczytu i edycji
   planów oraz importu aktywności przez integracje maszynowe (`docs/agent-api.md`).
+- **Powiadomienia push** — przypomnienie na telefon (Web Push / PWA) na X minut
+  przed zaplanowanym treningiem, domyślnie 30. Wyprzedzenie i strefa czasowa
+  konfigurowalne per konto; działa na Androidzie i na iPhonie (iOS 16.4+,
+  po dodaniu aplikacji do ekranu początkowego). Dyspozytor `/api/push?action=dispatch`
+  odpalany zewnętrznym cronem co 5 minut. Szczegóły: `docs/powiadomienia.md`.
 - **Konta użytkowników** — rejestracja, logowanie (JWT), reset hasła mailem
   (Nodemailer + Gmail).
 
@@ -45,6 +50,7 @@ PostgreSQL (Supabase).
 | Baza danych | PostgreSQL (Supabase), sterownik `pg`, RLS włączone |
 | Auth | JWT (`jsonwebtoken`) + bcrypt, wersjonowanie tokenów |
 | Mail | Nodemailer (Gmail, hasło aplikacji) |
+| Powiadomienia | Web Push (`web-push`, VAPID), service worker + manifest PWA |
 | AI | OpenAI Chat Completions |
 | Garmin | `@garmin/fitsdk` (parsowanie FIT w przeglądarce), `garmin-connect` (skrypt synchronizacji) |
 
@@ -68,19 +74,24 @@ api/                  Funkcje serverless (Vercel) — właściwy backend
   ai.js               Generowanie planu przez OpenAI
   activities.js       Import aktywności (Garmin) dla zalogowanego użytkownika
   agent/index.js      API agenta (klucz AGENT_API_KEY): plan tygodnia, edycja, import aktywności
+  _push.js            Konfiguracja VAPID i wysyłka Web Push (współdzielone)
+  push/index.js       ?action=prefs|subscribe|unsubscribe|test|dispatch (powiadomienia)
+public/               Statyki PWA: manifest, service worker, ikony (generator: scripts/gen-icons.mjs)
 src/                  Frontend React
   App.jsx             Stan aplikacji i kompozycja widoków
   api.js              Klient HTTP do /api
   garmin/parse.js     Parser FIT / ZIP / CSV z Garmin Connect (w przeglądarce)
-  components/         Modale i widoki (Report, Stats, Tracking, AI, Import, GarminImport…)
+  components/         Modale i widoki (Report, Stats, Tracking, AI, Import, GarminImport, Notify…)
+  push.js             Klient Web Push: zgoda, subskrypcja, odtwarzanie subskrypcji
   report-text.js      Budowanie tekstu raportu (Markdown/CSV) do eksportu
 server/               Alternatywny lokalny backend Express (podzbiór API:
                       auth, workouts, disciplines, exercise-logs + /api/health)
-supabase/migrations/  Migracje SQL (001–009)
+supabase/migrations/  Migracje SQL (001–010)
 scripts/migrate.js    Runner migracji (npm run db:migrate)
 scripts/garmin-sync/  Skrypt synchronizacji Garmin Connect → TrainStack (osobny package.json)
-docs/                 Dokumentacja: API agenta, integracja z Garminem, plan modułu raportowego
-vercel.json           Build + rewrites (SPA fallback na index.html)
+scripts/gen-icons.mjs Generator ikon PWA (PNG bez zależności graficznych)
+docs/                 Dokumentacja: API agenta, Garmin, powiadomienia push, plan modułu raportowego
+vercel.json           Build + rewrites (SPA fallback) + nagłówki cache dla sw.js/manifestu
 ```
 
 ## Uruchomienie lokalne
@@ -113,6 +124,9 @@ Frontend woła `/api/*` — lokalnie potrzebny jest backend. Do wyboru:
 | `OPENAI_MODEL` | nie | Model OpenAI (domyślny w `api/ai.js`) |
 | `GMAIL_USER`, `GMAIL_APP_PASSWORD` | dla maili | Konto Gmail + hasło aplikacji (reset hasła) |
 | `AGENT_API_KEY` | dla agenta | Klucz `/api/agent` (integracje maszynowe, skrypt Garmin); bez niego endpoint zwraca 503 |
+| `VAPID_PUBLIC_KEY`, `VAPID_PRIVATE_KEY` | dla powiadomień | Klucze Web Push (`npx web-push generate-vapid-keys --json`) |
+| `VAPID_SUBJECT` | dla powiadomień | `mailto:…` lub `https://…`; Apple odrzuca inne formaty |
+| `CRON_SECRET` | dla powiadomień | Sekret dyspozytora `/api/push?action=dispatch` |
 | `MAIL_FROM_NAME` | nie | Nazwa nadawcy maili |
 | `APP_URL` / `CLIENT_URL` | nie | URL frontendu (linki w mailach / CORS) |
 | `PORT` | nie | Port lokalnego serwera Express (domyślnie 3001) |
@@ -120,7 +134,7 @@ Frontend woła `/api/*` — lokalnie potrzebny jest backend. Do wyboru:
 ## Baza danych
 
 Schemat żyje w `supabase/migrations/` (users, disciplines, workouts,
-workout_logs, exercise_logs, rate_limits + RLS). Runner `npm run db:migrate`
+workout_logs, exercise_logs, rate_limits, push_subscriptions, workout_reminders + RLS). Runner `npm run db:migrate`
 wykonuje pliki w kolejności leksykograficznej i zapisuje wykonane w tabeli
 `schema_migrations` — migracje są idempotentne, więc pierwsze uruchomienie na
 istniejącej bazie niczego nie psuje.
@@ -131,3 +145,11 @@ Projekt jest skonfigurowany pod Vercel (`vercel.json`): build Vite do `dist/`,
 funkcje z `api/` pod `/api/*`, reszta ścieżek z fallbackiem SPA na
 `index.html`. Zmienne środowiskowe z tabeli powyżej ustawia się w ustawieniach
 projektu Vercel.
+
+Uwaga: plan Hobby dopuszcza **12 funkcji serverless** na deployment, a projekt ma
+ich 11 (pliki z prefiksem `_` w `api/` to współdzielone moduły, nie funkcje).
+Kolejne endpointy warto doklejać przez `?action=` do istniejących plików.
+
+Powiadomienia push wymagają dodatkowo zewnętrznego crona uderzającego co 5 minut
+w `/api/push?action=dispatch` — Vercel Cron na planie Hobby odpala zadanie tylko
+raz dziennie. Konfiguracja: `docs/powiadomienia.md`.

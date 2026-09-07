@@ -52,6 +52,15 @@ class ErrorBoundary extends React.Component {
   }
 }
 
+// Rejestracja po 'load', żeby pobranie service workera nie konkurowało
+// o pasmo z bundlem. Brak SW oznacza brak powiadomień, ale aplikacja działa
+// normalnie — stąd sam log zamiast komunikatu dla użytkownika.
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/sw.js').catch((e) => console.error('SW register error:', e))
+  })
+}
+
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
     <ErrorBoundary>

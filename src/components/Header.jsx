@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { BarChart3, ChevronLeft, ChevronRight, FileText, Grid, Layers, LogOut, MoreVertical, Plus, Settings, Sparkles, Upload, Watch } from 'lucide-react'
+import { BarChart3, Bell, ChevronLeft, ChevronRight, FileText, Grid, Layers, LogOut, MoreVertical, Plus, Settings, Sparkles, Upload, Watch } from 'lucide-react'
 
 const MONTHS_GEN = ['stycznia','lutego','marca','kwietnia','maja','czerwca','lipca','sierpnia','września','października','listopada','grudnia']
 
@@ -15,7 +15,7 @@ function fmtDayLabel(day) {
 
 export default function Header({
   hdrRef, compact, days, stats, user, view, selDay,
-  onPrev, onNext, onToday, onAdd, onImport, onGarmin, onAI, onCat, onStats, onReport, onLogout,
+  onPrev, onNext, onToday, onAdd, onImport, onGarmin, onAI, onCat, onStats, onReport, onNotify, onLogout,
   onSetView,
 }) {
   const pct = stats.total > 0 ? Math.round((stats.done / stats.total) * 100) : 0
@@ -87,6 +87,7 @@ export default function Header({
               <button className="tp-menu-it" onClick={pick(onStats)}><BarChart3 size={13} /> Statystyki</button>
               <button className="tp-menu-it" onClick={pick(onReport)}><FileText size={13} /> Raport</button>
               <button className="tp-menu-it" onClick={pick(onCat)}><Settings size={13} /> Kategorie</button>
+              <button className="tp-menu-it" onClick={pick(onNotify)}><Bell size={13} /> Powiadomienia</button>
               {user && (
                 <>
                   <div className="tp-menu-div" />
