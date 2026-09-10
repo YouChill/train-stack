@@ -3,6 +3,7 @@ import CSS from './styles.js'
 import { DAYS, DEFAULT_DISCIPLINES } from './constants.js'
 import { uid, getWeekDates, weekStartStr, normalizeWorkout } from './utils.js'
 import * as api from './api.js'
+import { syncSubscription } from './push.js'
 
 import Header      from './components/Header.jsx'
 import DayColumn   from './components/DayColumn.jsx'
@@ -20,6 +21,7 @@ import StatsModal  from './components/StatsModal.jsx'
 import ReportModal from './components/ReportModal.jsx'
 import ExerciseModal from './components/ExerciseModal.jsx'
 import WorkoutPlanModal from './components/WorkoutPlanModal.jsx'
+import NotifyModal from './components/NotifyModal.jsx'
 import Toasts, { toast } from './components/Toasts.jsx'
 
 function getTodayKey() {
@@ -115,6 +117,7 @@ export default function App() {
   const [reportM, setReportM] = useState(false)
   const [exerciseM, setExerciseM] = useState(null) // { workout, exercise }
   const [planM, setPlanM] = useState(null) // workout whose plan to show
+  const [notifyM, setNotifyM] = useState(false)
 
   const days  = getWeekDates(off)
   const wk    = (day) => `${off}|${day}`
@@ -143,6 +146,15 @@ export default function App() {
     setWkts({})
     setDiscs(DEFAULT_DISCIPLINES)
   }
+
+  // Subskrypcja push potrafi zostać unieważniona po stronie przeglądarki
+  // (reinstalacja PWA na iOS, rotacja endpointu). Odświeżamy ją po cichu przy
+  // każdym wejściu — inaczej przypomnienia przestają przychodzić bez żadnego
+  // sygnału dla użytkownika.
+  useEffect(() => {
+    if (!user) return
+    syncSubscription().catch(() => {})
+  }, [user])
 
   // ── SYNC: load workouts when week changes ─────────────────────────────────
   const fetchWeek = useCallback(async (weekOff) => {
@@ -480,6 +492,7 @@ export default function App() {
           onCat={()   => setCatM(true)}
           onStats={() => setStatsM(true)}
           onReport={() => setReportM(true)}
+          onNotify={() => setNotifyM(true)}
           onLogout={logout}
           onSetView={setView}
         />
@@ -548,6 +561,7 @@ export default function App() {
       )}
       {aiM  && <AIModal discs={discs} onImport={importW} onClose={() => setAiM(false)} />}
       {catM && <CatModal discs={discs} onChange={saveDiscs} onClose={() => setCatM(false)} />}
+      {notifyM && <NotifyModal onClose={() => setNotifyM(false)} />}
       {trackM && <TrackingModal workout={trackM} discs={discs} onSave={saveLog} onClose={() => setTrackM(null)} />}
       {journalM && <LogJournalModal workout={journalM} discs={discs} onClose={() => setJournalM(null)} onTrack={(w) => { setJournalM(null); setTrackM(w) }} />}
       {planM && (
